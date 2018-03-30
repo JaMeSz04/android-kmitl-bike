@@ -1,11 +1,11 @@
-package com.hitherejoe.mvpboilerplate;
+package com.shubu.kmitlbike;
 
 import android.app.Application;
 import android.content.Context;
 
-import com.hitherejoe.mvpboilerplate.injection.component.ApplicationComponent;
-import com.hitherejoe.mvpboilerplate.injection.component.DaggerApplicationComponent;
-import com.hitherejoe.mvpboilerplate.injection.module.ApplicationModule;
+import com.shubu.kmitlbike.injection.component.ApplicationComponent;
+import com.shubu.kmitlbike.injection.component.DaggerApplicationComponent;
+import com.shubu.kmitlbike.injection.module.ApplicationModule;
 
 import timber.log.Timber;
 

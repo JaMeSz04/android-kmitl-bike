@@ -1,11 +1,11 @@
-package com.hitherejoe.mvpboilerplate.injection.module;
+package com.shubu.kmitlbike.injection.module;
 
 import android.app.Application;
 import android.content.Context;
 
-import com.hitherejoe.mvpboilerplate.data.remote.MvpBoilerplateService;
-import com.hitherejoe.mvpboilerplate.data.remote.MvpBoilerplateServiceFactory;
-import com.hitherejoe.mvpboilerplate.injection.ApplicationContext;
+import com.shubu.kmitlbike.data.remote.MvpBoilerplateService;
+import com.shubu.kmitlbike.data.remote.MvpBoilerplateServiceFactory;
+import com.shubu.kmitlbike.injection.ApplicationContext;
 
 import javax.inject.Singleton;
 

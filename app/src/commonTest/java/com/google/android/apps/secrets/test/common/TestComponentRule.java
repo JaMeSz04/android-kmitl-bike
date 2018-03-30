@@ -5,8 +5,8 @@ import android.content.Context;
 import com.google.android.apps.secrets.test.common.injection.component.DaggerTestComponent;
 import com.google.android.apps.secrets.test.common.injection.component.TestComponent;
 import com.google.android.apps.secrets.test.common.injection.module.ApplicationTestModule;
-import com.hitherejoe.mvpboilerplate.MvpBoilerplateApplication;
-import com.hitherejoe.mvpboilerplate.data.DataManager;
+import com.shubu.kmitlbike.KMITLBikeApplication;
+import com.shubu.kmitlbike.data.DataManager;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -26,7 +26,7 @@ public class TestComponentRule implements TestRule {
 
     public TestComponentRule(Context context) {
         mContext = context;
-        MvpBoilerplateApplication application = MvpBoilerplateApplication.get(context);
+        KMITLBikeApplication application = KMITLBikeApplication.get(context);
         mTestComponent = DaggerTestComponent.builder()
                 .applicationTestModule(new ApplicationTestModule(application))
                 .build();
@@ -49,7 +49,7 @@ public class TestComponentRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                MvpBoilerplateApplication application = MvpBoilerplateApplication.get(mContext);
+                KMITLBikeApplication application = KMITLBikeApplication.get(mContext);
                 application.setComponent(mTestComponent);
                 base.evaluate();
                 application.setComponent(null);

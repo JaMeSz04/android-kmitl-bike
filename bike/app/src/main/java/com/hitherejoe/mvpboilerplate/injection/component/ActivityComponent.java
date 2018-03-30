@@ -1,10 +1,10 @@
-package com.hitherejoe.mvpboilerplate.injection.component;
+package com.shubu.kmitlbike.injection.component;
 
-import com.hitherejoe.mvpboilerplate.injection.PerActivity;
-import com.hitherejoe.mvpboilerplate.injection.module.ActivityModule;
-import com.hitherejoe.mvpboilerplate.ui.base.BaseActivity;
-import com.hitherejoe.mvpboilerplate.ui.detail.DetailActivity;
-import com.hitherejoe.mvpboilerplate.ui.main.MainActivity;
+import com.shubu.kmitlbike.injection.PerActivity;
+import com.shubu.kmitlbike.injection.module.ActivityModule;
+import com.shubu.kmitlbike.ui.base.BaseActivity;
+import com.shubu.kmitlbike.ui.detail.DetailActivity;
+import com.shubu.kmitlbike.ui.main.MainActivity;
 
 import dagger.Subcomponent;
 

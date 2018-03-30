@@ -1,14 +1,14 @@
-package com.hitherejoe.mvpboilerplate.ui.base;
+package com.shubu.kmitlbike.ui.base;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
-import com.hitherejoe.mvpboilerplate.MvpBoilerplateApplication;
-import com.hitherejoe.mvpboilerplate.injection.component.ConfigPersistentComponent;
-import com.hitherejoe.mvpboilerplate.injection.component.DaggerConfigPersistentComponent;
-import com.hitherejoe.mvpboilerplate.injection.component.FragmentComponent;
-import com.hitherejoe.mvpboilerplate.injection.module.FragmentModule;
+import com.shubu.kmitlbike.MvpBoilerplateApplication;
+import com.shubu.kmitlbike.injection.component.ConfigPersistentComponent;
+import com.shubu.kmitlbike.injection.component.DaggerConfigPersistentComponent;
+import com.shubu.kmitlbike.injection.component.FragmentComponent;
+import com.shubu.kmitlbike.injection.module.FragmentModule;
 
 import java.util.HashMap;
 import java.util.Map;

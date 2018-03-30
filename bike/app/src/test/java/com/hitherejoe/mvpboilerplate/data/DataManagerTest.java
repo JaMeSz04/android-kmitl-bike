@@ -1,10 +1,10 @@
-package com.hitherejoe.mvpboilerplate.data;
+package com.shubu.kmitlbike.data;
 
 import com.google.android.apps.secrets.test.common.TestDataFactory;
-import com.hitherejoe.mvpboilerplate.data.model.NamedResource;
-import com.hitherejoe.mvpboilerplate.data.model.Pokemon;
-import com.hitherejoe.mvpboilerplate.data.remote.MvpBoilerplateService;
-import com.hitherejoe.mvpboilerplate.util.RxSchedulersOverrideRule;
+import com.shubu.kmitlbike.data.model.NamedResource;
+import com.shubu.kmitlbike.data.model.Pokemon;
+import com.shubu.kmitlbike.data.remote.MvpBoilerplateService;
+import com.shubu.kmitlbike.util.RxSchedulersOverrideRule;
 
 import org.junit.Before;
 import org.junit.Rule;

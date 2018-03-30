@@ -1,9 +1,9 @@
 package com.google.android.apps.secrets.test.common;
 
-import com.hitherejoe.mvpboilerplate.data.model.NamedResource;
-import com.hitherejoe.mvpboilerplate.data.model.Pokemon;
-import com.hitherejoe.mvpboilerplate.data.model.Sprites;
-import com.hitherejoe.mvpboilerplate.data.model.Statistic;
+import com.shubu.kmitlbike.data.model.NamedResource;
+import com.shubu.kmitlbike.data.model.Pokemon;
+import com.shubu.kmitlbike.data.model.Sprites;
+import com.shubu.kmitlbike.data.model.Statistic;
 
 import java.util.ArrayList;
 import java.util.List;

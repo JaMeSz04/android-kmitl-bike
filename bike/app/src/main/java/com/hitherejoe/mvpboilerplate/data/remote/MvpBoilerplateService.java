@@ -1,8 +1,8 @@
-package com.hitherejoe.mvpboilerplate.data.remote;
+package com.shubu.kmitlbike.data.remote;
 
 
-import com.hitherejoe.mvpboilerplate.data.model.NamedResource;
-import com.hitherejoe.mvpboilerplate.data.model.Pokemon;
+import com.shubu.kmitlbike.data.model.NamedResource;
+import com.shubu.kmitlbike.data.model.Pokemon;
 
 import java.util.List;
 

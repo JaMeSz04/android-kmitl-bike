@@ -1,9 +1,9 @@
-package com.hitherejoe.mvpboilerplate.data.remote;
+package com.shubu.kmitlbike.data.remote;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.hitherejoe.mvpboilerplate.BuildConfig;
+import com.shubu.kmitlbike.BuildConfig;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;

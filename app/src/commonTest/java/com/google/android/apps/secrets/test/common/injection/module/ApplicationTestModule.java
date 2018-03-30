@@ -3,9 +3,9 @@ package com.google.android.apps.secrets.test.common.injection.module;
 import android.app.Application;
 import android.content.Context;
 
-import com.hitherejoe.mvpboilerplate.data.DataManager;
-import com.hitherejoe.mvpboilerplate.data.remote.Router;
-import com.hitherejoe.mvpboilerplate.injection.ApplicationContext;
+import com.shubu.kmitlbike.data.DataManager;
+import com.shubu.kmitlbike.data.remote.Router;
+import com.shubu.kmitlbike.injection.ApplicationContext;
 
 import javax.inject.Singleton;
 

@@ -5,8 +5,8 @@ import android.content.Context;
 import com.google.android.apps.secrets.test.common.injection.component.DaggerTestComponent;
 import com.google.android.apps.secrets.test.common.injection.component.TestComponent;
 import com.google.android.apps.secrets.test.common.injection.module.ApplicationTestModule;
-import com.hitherejoe.mvpboilerplate.MvpBoilerplateApplication;
-import com.hitherejoe.mvpboilerplate.data.DataManager;
+import com.shubu.kmitlbike.MvpBoilerplateApplication;
+import com.shubu.kmitlbike.data.DataManager;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
