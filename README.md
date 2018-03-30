@@ -1,13 +1,7 @@
-MvpBoilerplate
+KMITLBike V.3 Android version
 =======
 
-<p align="center">
-    <img src="art/screens.png" alt="MvpBoilerplate Screens"/>
-</p>
-
-An MVP Boilerplate to save me having to create the same project over from scratch every time! :)
-
-This project uses:
+Libs:
 
 - Support libraries: AppCompat, Design.
 - [RxJava](https://github.com/ReactiveX/RxJava) and [RxAndroid](https://github.com/ReactiveX/RxAndroid)
@@ -21,15 +15,6 @@ This project uses:
 - [Mockito](http://mockito.org/)
 - [Checkstyle](http://checkstyle.sourceforge.net/), [PMD](https://pmd.github.io/) and [Findbugs](http://findbugs.sourceforge.net/) for code analysis
 
-Requirements
-------------
-
- - [Android SDK](http://developer.android.com/sdk/index.html).
- - Android [4.3 (API 18) ](http://developer.android.com/tools/revisions/platforms.html#4.3).
- - Android SDK Tools
- - Android SDK Build tools 23.0.2
- - Android Support Repository
- - Android Support libraries
 
 Building
 --------
