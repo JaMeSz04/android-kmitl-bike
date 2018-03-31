@@ -303,9 +303,11 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 
     @Override
     public void redirect(String where) {
+        Intent intent;
         switch (where){
             case "main" :
-
+                intent = new Intent(this,HomeActivity.class);
+                startActivity(intent);
                 break;
 
             case "register" :

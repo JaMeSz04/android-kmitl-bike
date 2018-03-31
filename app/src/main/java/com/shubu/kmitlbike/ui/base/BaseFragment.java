@@ -1,8 +1,9 @@
 package com.shubu.kmitlbike.ui.base;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+
 
 import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.injection.component.ConfigPersistentComponent;

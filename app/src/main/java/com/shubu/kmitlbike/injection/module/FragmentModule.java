@@ -1,8 +1,9 @@
 package com.shubu.kmitlbike.injection.module;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
-import android.support.v4.app.Fragment;
+
 
 import com.shubu.kmitlbike.injection.ActivityContext;
 
