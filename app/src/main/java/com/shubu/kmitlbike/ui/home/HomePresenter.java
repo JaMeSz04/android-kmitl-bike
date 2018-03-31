@@ -24,6 +24,11 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
     public HomePresenter(DataManager dataManager) {
         mDataManager = dataManager;
     }
+    @Override
+    public void attachView(HomeMVPView mvpView) {
+        super.attachView(mvpView);
+        mSubscriptions = new CompositeSubscription();
+    }
 
     public void getBikeList() {
         mSubscriptions.add(mDataManager.getBikeList()
