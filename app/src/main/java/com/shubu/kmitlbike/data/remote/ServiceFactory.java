@@ -1,15 +1,26 @@
 package com.shubu.kmitlbike.data.remote;
 
+import android.content.Context;
+
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.shubu.kmitlbike.BuildConfig;
+import com.shubu.kmitlbike.KMITLBikeApplication;
+import com.shubu.kmitlbike.injection.ApplicationContext;
+import com.shubu.kmitlbike.injection.component.DaggerConfigPersistentComponent;
 
+import java.io.IOException;
+
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
+import timber.log.Timber;
 
 /**
  * Provide "make" methods to create instances of {@link Router}
@@ -35,6 +46,7 @@ public class ServiceFactory {
 
     public static OkHttpClient makeOkHttpClient(HttpLoggingInterceptor httpLoggingInterceptor) {
         return new OkHttpClient.Builder()
+                .addInterceptor(new AuthIntercepter())
                 .addInterceptor(httpLoggingInterceptor)
                 .build();
     }
@@ -52,4 +64,6 @@ public class ServiceFactory {
                 : HttpLoggingInterceptor.Level.NONE);
         return logging;
     }
+
+
 }

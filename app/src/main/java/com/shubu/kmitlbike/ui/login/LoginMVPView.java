@@ -1,5 +1,7 @@
 package com.shubu.kmitlbike.ui.login;
 
+import android.content.Context;
+
 import com.shubu.kmitlbike.ui.base.MvpView;
 
 /**
@@ -10,4 +12,6 @@ public interface LoginMVPView extends MvpView {
     void login(String email, String password);
     void showSuccess(String msg);
     void showError(String error);
+    void validateToken();
+    void redirect(String where);
 }

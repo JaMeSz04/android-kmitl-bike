@@ -1,7 +1,13 @@
 package com.shubu.kmitlbike.ui.login;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import com.orhanobut.hawk.Hawk;
+import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.data.DataManager;
 import com.shubu.kmitlbike.data.model.LoginResponse;
+import com.shubu.kmitlbike.injection.ApplicationContext;
 import com.shubu.kmitlbike.injection.ConfigPersistent;
 import com.shubu.kmitlbike.ui.base.BasePresenter;
 
@@ -11,6 +17,7 @@ import rx.SingleSubscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
 
 /**
  * Created by patip on 3/30/2018.
@@ -50,7 +57,10 @@ public class LoginPresenter extends BasePresenter<LoginMVPView> {
 
                     @Override
                     public void onSuccess(LoginResponse value) {
+                        // TODO: 3/31/18 : move sharepref token to datamanager
+                        Hawk.put("token", value.getToken());
                         getMvpView().showSuccess(value.toString());
+                        getMvpView().redirect("main");
                     }
 
                     @Override
@@ -58,6 +68,11 @@ public class LoginPresenter extends BasePresenter<LoginMVPView> {
                         getMvpView().showError(error.toString());
                     }
                 }));
+    }
+
+    public boolean validateToken(){
+        return !Hawk.get("token","").isEmpty();
+
     }
 
 }
