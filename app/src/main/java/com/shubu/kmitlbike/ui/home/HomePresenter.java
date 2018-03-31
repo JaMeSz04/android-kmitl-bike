@@ -32,7 +32,6 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
             .subscribe(new SingleSubscriber<List<Bike>>() {
                 @Override
                 public void onSuccess(List<Bike> value) {
-
                     getMvpView().onBikeListUpdate(value);
                 }
 

@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 apply from: '../config/quality/quality.gradle'
-apply plugin: 'com.neenbedankt.android-apt'
+
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "com.shubu.kmitlbike"
@@ -107,10 +107,9 @@ dependencies {
     testCompile 'org.robolectric:robolectric:3.0'
 
     // APT dependencies
-    apt "com.jakewharton:butterknife-compiler:$BUTTERKNIFE_VERSION"
-    apt daggerCompiler
-    testApt daggerCompiler
-    androidTestApt daggerCompiler
+    annotationProcessor "com.jakewharton:butterknife-compiler:$BUTTERKNIFE_VERSION"
+    annotationProcessor daggerCompiler
+
 }
 
 // Log out test results to console

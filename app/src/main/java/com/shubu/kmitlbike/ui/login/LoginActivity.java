@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -33,6 +34,7 @@ import java.util.List;
 
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
+import com.shubu.kmitlbike.ui.home.HomeActivity;
 
 import javax.inject.Inject;
 
@@ -284,6 +286,8 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
     public void showSuccess(String response) {
         this.showProgress(false);
         Timber.i(response);
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
     }
 
     @Override
