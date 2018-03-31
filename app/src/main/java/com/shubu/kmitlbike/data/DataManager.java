@@ -3,6 +3,7 @@ package com.shubu.kmitlbike.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.data.model.NamedResource;
@@ -51,6 +52,10 @@ public class DataManager {
         Timber.i("gonna login");
         return mRouter.login(new LoginForm(username, password));
 
+    }
+
+    public Single<List<Bike>> getBikeList(){
+        return mRouter.getBikeList();
     }
 
 

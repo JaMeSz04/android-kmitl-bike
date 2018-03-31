@@ -1,6 +1,7 @@
 package com.shubu.kmitlbike.data.remote;
 
 
+import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.data.model.NamedResource;
@@ -25,6 +26,9 @@ public interface Router {
 
     @POST("api/v1/accounts/login")
     Single<LoginResponse> login(@Body LoginForm form);
+
+    @GET("api/v1/bikes/list")
+    Single<List<Bike>> getBikeList();
 
     class PokemonListResponse {
         public List<NamedResource> results;
