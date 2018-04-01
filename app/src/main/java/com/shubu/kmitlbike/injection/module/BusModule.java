@@ -2,6 +2,7 @@ package com.shubu.kmitlbike.injection.module;
 
 
 import com.shubu.kmitlbike.data.model.Bike;
+import com.shubu.kmitlbike.data.model.UsagePlan;
 
 import java.util.List;
 
@@ -14,12 +15,24 @@ import rx.subjects.PublishSubject;
 
 @Module
 public class BusModule {
-    public static final String HOME_PROVIDER = "HOME_PROVIDER";
+    public static final String BIKE_PROVIDER = "BIKE_PROVIDER";
+    public static final String PLAN_PROVIDER = "PLAN_PROVIDER";
 
     @Provides
     @Singleton
-    @Named(HOME_PROVIDER)
+    @Named(BIKE_PROVIDER)
     static PublishSubject<List<Bike>> provideBike() {
         return PublishSubject.create();
     }
+
+    @Provides
+    @Singleton
+    @Named(PLAN_PROVIDER)
+    static PublishSubject<List<UsagePlan>> providePlan() {
+        return PublishSubject.create();
+    }
+
+
+
+
 }

@@ -14,8 +14,10 @@ import com.google.android.gms.maps.MapFragment;
 import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.data.model.Bike;
+import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.injection.component.BusComponent;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
+import com.shubu.kmitlbike.ui.home.fragment.HomeBottomSheetBehavior;
 import com.shubu.kmitlbike.ui.home.fragment.HomeFragment;
 
 import java.util.List;
@@ -24,6 +26,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import timber.log.Timber;
 
 public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragment.OnFragmentInteractionListener {
@@ -43,20 +46,11 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
         ButterKnife.bind(this);
         presenter.attachView(this);
         presenter.getBikeList();
+        presenter.getUsagePlan();
 
         sheetBehavior = BottomSheetBehavior.from(bottomSheet);
         // TODO: 4/1/2018 currently use for dev purpose -> change it to HomeBottomSheetBehavior later
-        sheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
 
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
-            }
-        });
 
         if (savedInstanceState == null)
             this.constructFragment();
@@ -70,7 +64,8 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
         ft.add(layout.getId(), homeFragment).commit();
     }
 
-    private void toggleBottomSheet(){
+    @OnClick(R.id.ride_button)
+    public void toggleBottomSheet(){
         if (sheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
             sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         } else {
@@ -81,6 +76,12 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
     @Override
     public void onBikeListUpdate(List<Bike> bikes) {
         this.eventBus.getBike().onNext(bikes); //publish bikes to subscribers
+    }
+
+    @Override
+    public void onUsagePlanUpdate(List<UsagePlan> plans) {
+        Timber.i("new plan" + plans.toString());
+        this.eventBus.getPlan().onNext(plans);
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.data.model.NamedResource;
 import com.shubu.kmitlbike.data.model.Pokemon;
+import com.shubu.kmitlbike.data.model.UsagePlan;
 
 import java.util.List;
 
@@ -29,6 +30,10 @@ public interface Router {
 
     @GET("api/v1/bikes/list")
     Single<List<Bike>> getBikeList();
+
+    @GET("api/v1/bikes/plans/list")
+    Single<List<UsagePlan>> getUsagePlan();
+
 
     class PokemonListResponse {
         public List<NamedResource> results;

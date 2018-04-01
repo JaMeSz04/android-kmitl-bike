@@ -8,6 +8,7 @@ import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.data.model.NamedResource;
 import com.shubu.kmitlbike.data.model.Pokemon;
+import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.remote.Router;
 import com.shubu.kmitlbike.data.remote.Router.PokemonListResponse;
 import com.shubu.kmitlbike.injection.ApplicationContext;
@@ -54,6 +55,10 @@ public class DataManager {
 
     }
 
+    public Single<List<UsagePlan>> getUsagePlan(){
+        return mRouter.getUsagePlan();
+    }
+
     public Single<List<Bike>> getBikeList(){
         return mRouter.getBikeList();
     }
@@ -64,6 +69,7 @@ public class DataManager {
         String token = pref.getString("token","");
         return !token.isEmpty();
     }
+
 
 
     public Single<Pokemon> getPokemon(String name) {

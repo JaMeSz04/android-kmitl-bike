@@ -56,8 +56,6 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
     private void initializeBikeService(){
         Timber.i("in fragment!!!");
         eventBus.getBike().subscribe( (bikes -> {
-            Timber.e("receive bike like in fragment!!!");
-            Timber.e(bikes.toString());
             this.bikeList = bikes;
         }));
     }
@@ -127,7 +125,6 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
             googleMap.setMyLocationEnabled(true);
         }
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CONSTANTS.KMITL_LOCATION, 17));
-        Timber.e("init bike marker");
         this.updateBikeLocation();
 
     }

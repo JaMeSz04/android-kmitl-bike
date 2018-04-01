@@ -3,14 +3,18 @@ package com.shubu.kmitlbike.ui.home;
 import com.shubu.kmitlbike.data.DataManager;
 import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.data.model.LoginResponse;
+import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.ui.base.BasePresenter;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import rx.Scheduler;
+import rx.Single;
 import rx.SingleSubscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -47,5 +51,25 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
                 }
             }));
     }
+
+    public void getUsagePlan(){
+        mSubscriptions.add(mDataManager.getUsagePlan()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe(new SingleSubscriber<List<UsagePlan>>() {
+                @Override
+                public void onSuccess(List<UsagePlan> value) {
+                    getMvpView().onUsagePlanUpdate(value);
+                }
+
+                @Override
+                public void onError(Throwable error) {
+
+                }
+            }))
+        ;
+    }
+
+
 
 }
