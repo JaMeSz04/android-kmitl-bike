@@ -17,6 +17,7 @@ import rx.subjects.PublishSubject;
 public class BusModule {
     public static final String BIKE_PROVIDER = "BIKE_PROVIDER";
     public static final String PLAN_PROVIDER = "PLAN_PROVIDER";
+    public static final String SCANNER_PROVIDER = "SCANNER_PROVIDER";
 
     @Provides
     @Singleton

@@ -1,24 +1,27 @@
 package com.shubu.kmitlbike.ui.home;
 
+import android.Manifest;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import com.google.android.gms.maps.MapFragment;
-import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
-import com.shubu.kmitlbike.injection.component.BusComponent;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
 import com.shubu.kmitlbike.ui.home.fragment.BottomSheetFragment;
-import com.shubu.kmitlbike.ui.home.fragment.HomeBottomSheetBehavior;
+import com.shubu.kmitlbike.ui.home.fragment.ScannerFragment;
+import com.shubu.kmitlbike.util.HomeBottomSheetBehavior;
 import com.shubu.kmitlbike.ui.home.fragment.HomeFragment;
 
 import java.util.List;
@@ -30,13 +33,15 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import timber.log.Timber;
 
-public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragment.OnFragmentInteractionListener, BottomSheetFragment.OnFragmentInteractionListener {
+public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragment.OnFragmentInteractionListener, BottomSheetFragment.OnFragmentInteractionListener, ScannerFragment.OnFragmentInteractionListener {
 
     @Inject HomePresenter presenter;
 
     @BindView(R.id.home_frame) FrameLayout layout;
     @BindView(R.id.bottom_sheet) LinearLayout bottomSheet;
+    @BindView(R.id.home_scanner) FrameLayout scanner;
     @BindView(R.id.sheet_content_layout) FrameLayout bottomSheetLayout;
+    @BindView(R.id.HomeRideButton) FloatingActionButton fab;
 
     protected BottomSheetBehavior sheetBehavior;
 
@@ -50,7 +55,19 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
         presenter.getBikeList();
         presenter.getUsagePlan();
 
-        sheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        sheetBehavior = HomeBottomSheetBehavior.from(bottomSheet);
+        sheetBehavior.setBottomSheetCallback(
+                new BottomSheetBehavior.BottomSheetCallback() {
+                     @Override
+                     public void onStateChanged(@NonNull View bottomSheet, int newState) { }
+
+                     @Override
+                     public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                         fab.animate().scaleX(1 - slideOffset).scaleY(1 - slideOffset).setDuration(0).start();
+                     }
+                 }
+        );
+
         // TODO: 4/1/2018 currently use for dev purpose -> change it to HomeBottomSheetBehavior later
 
 
@@ -68,13 +85,27 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
         ft.add(bottomSheetLayout.getId(), bottomSheetFragment).commit();
     }
 
-    @OnClick(R.id.ride_button)
+    @OnClick(R.id.HomeRideButton)
     public void toggleBottomSheet(){
         if (sheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
             sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         } else {
             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
+    }
+
+    @Override
+    public void onScannerStart() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA}, 1);
+        }
+
+        Fragment scannerFragment = new ScannerFragment();
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        ft.replace(scanner.getId(), scannerFragment).addToBackStack("scanner").commit();
+        // TODO: 4/1/2018 raise error, you don't have access to camera!!
     }
 
     @Override
@@ -91,5 +122,8 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+
     }
+
+
 }

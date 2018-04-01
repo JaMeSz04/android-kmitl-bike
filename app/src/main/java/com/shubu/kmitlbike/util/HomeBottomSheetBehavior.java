@@ -1,4 +1,4 @@
-package com.shubu.kmitlbike.ui.home.fragment;
+package com.shubu.kmitlbike.util;
 
 import android.content.Context;
 import android.support.design.widget.BottomSheetBehavior;
@@ -13,6 +13,8 @@ public class HomeBottomSheetBehavior <V extends View> extends BottomSheetBehavio
     public HomeBottomSheetBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
+
+
 
     @Override
     public boolean onInterceptTouchEvent(CoordinatorLayout parent, V child, MotionEvent event) {

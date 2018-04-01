@@ -22,4 +22,6 @@ public interface BusComponent {
 
     @Named(BusModule.PLAN_PROVIDER)
     PublishSubject<List<UsagePlan>> getPlan();
+
+
 }
