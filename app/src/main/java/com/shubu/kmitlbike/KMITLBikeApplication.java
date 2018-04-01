@@ -5,7 +5,9 @@ import android.content.Context;
 
 import com.orhanobut.hawk.Hawk;
 import com.shubu.kmitlbike.injection.component.ApplicationComponent;
+import com.shubu.kmitlbike.injection.component.BusComponent;
 import com.shubu.kmitlbike.injection.component.DaggerApplicationComponent;
+import com.shubu.kmitlbike.injection.component.DaggerBusComponent;
 import com.shubu.kmitlbike.injection.module.ApplicationModule;
 
 import timber.log.Timber;
@@ -14,14 +16,20 @@ public class KMITLBikeApplication extends Application  {
 
     ApplicationComponent mApplicationComponent;
     private static Context appContext;
+    private static BusComponent eventBus;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Hawk.init(this.getApplicationContext()).build();
+        eventBus = DaggerBusComponent.create();
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         }
+    }
+
+    public static BusComponent getEventBus(){
+        return eventBus;
     }
 
     public static KMITLBikeApplication get(Context context) {
