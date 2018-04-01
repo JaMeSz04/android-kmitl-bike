@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 
 
 import com.shubu.kmitlbike.KMITLBikeApplication;
+import com.shubu.kmitlbike.injection.component.BusComponent;
 import com.shubu.kmitlbike.injection.component.ConfigPersistentComponent;
 import com.shubu.kmitlbike.injection.component.DaggerConfigPersistentComponent;
 import com.shubu.kmitlbike.injection.component.FragmentComponent;
@@ -25,7 +26,8 @@ import timber.log.Timber;
  */
 public abstract class BaseFragment extends Fragment {
 
-    private CompositeSubscription mSubscription;
+    protected CompositeSubscription mSubscription;
+    protected BusComponent eventBus;
     private static final String KEY_FRAGMENT_ID = "KEY_FRAGMENT_ID";
     private static final Map<Long, ConfigPersistentComponent> sComponentsMap = new HashMap<>();
     private static final AtomicLong NEXT_ID = new AtomicLong(0);
@@ -37,6 +39,7 @@ public abstract class BaseFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSubscription = new CompositeSubscription();
+        eventBus = KMITLBikeApplication.getEventBus();
         // Create the FragmentComponent and reuses cached ConfigPersistentComponent if this is
         // being called after a configuration change.
         mFragmentId = savedInstanceState != null ?

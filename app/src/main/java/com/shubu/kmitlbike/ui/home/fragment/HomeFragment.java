@@ -10,12 +10,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.annimon.stream.Stream;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.R;
+import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
+import com.shubu.kmitlbike.ui.common.CONSTANTS;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import timber.log.Timber;
@@ -25,7 +34,7 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
 
     private MapView mapView;
     private GoogleMap googleMap;
-
+    private List<Bike> bikeList;
     private OnFragmentInteractionListener mListener;
 
     public HomeFragment() {
@@ -41,11 +50,37 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+    }
+
+    private void initializeBikeService(){
         Timber.i("in fragment!!!");
-        KMITLBikeApplication.getEventBus().getBike().subscribe( (bikes -> {
+        eventBus.getBike().subscribe( (bikes -> {
             Timber.e("receive bike like in fragment!!!");
             Timber.e(bikes.toString());
+            this.bikeList = bikes;
         }));
+    }
+
+    private void updateBikeLocation(){
+        // slow internet case : map was loaded faster then api
+        // fast internet case : map hasn't loaded but receive bikelist already
+
+        if (this.bikeList != null && googleMap != null) {
+            googleMap.clear();
+            List<MarkerOptions> markers;
+            markers = Stream.of(this.bikeList).map(bike -> {
+                return new MarkerOptions().position(new LatLng(bike.getLatitude(), bike.getLongitude()));
+            }).toList();
+
+            Stream.of(markers).forEach(marker -> googleMap.addMarker(marker));
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        this.initializeBikeService();
     }
 
     @Override
@@ -55,7 +90,6 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
         this.mapView = (MapView) rootView.findViewById(R.id.mapView);
         this.mapView.onCreate(savedInstanceState);
         this.mapView.onResume();
-
         this.mapView.getMapAsync(this);
 
         // Inflate the layout for this fragment
@@ -91,8 +125,11 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
         googleMap = mMap;
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             googleMap.setMyLocationEnabled(true);
-            
         }
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CONSTANTS.KMITL_LOCATION, 17));
+        Timber.e("init bike marker");
+        this.updateBikeLocation();
+
     }
 
 

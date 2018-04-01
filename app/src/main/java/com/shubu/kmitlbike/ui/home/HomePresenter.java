@@ -37,6 +37,7 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
             .subscribe(new SingleSubscriber<List<Bike>>() {
                 @Override
                 public void onSuccess(List<Bike> value) {
+                    Timber.e("pass presenter");
                     getMvpView().onBikeListUpdate(value);
                 }
 
