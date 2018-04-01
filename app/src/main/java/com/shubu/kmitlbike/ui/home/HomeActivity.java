@@ -17,6 +17,7 @@ import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.injection.component.BusComponent;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
+import com.shubu.kmitlbike.ui.home.fragment.BottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.HomeBottomSheetBehavior;
 import com.shubu.kmitlbike.ui.home.fragment.HomeFragment;
 
@@ -29,12 +30,13 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import timber.log.Timber;
 
-public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragment.OnFragmentInteractionListener {
+public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragment.OnFragmentInteractionListener, BottomSheetFragment.OnFragmentInteractionListener {
 
     @Inject HomePresenter presenter;
 
     @BindView(R.id.home_frame) FrameLayout layout;
     @BindView(R.id.bottom_sheet) LinearLayout bottomSheet;
+    @BindView(R.id.sheet_content_layout) FrameLayout bottomSheetLayout;
 
     protected BottomSheetBehavior sheetBehavior;
 
@@ -60,8 +62,10 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
 
     private void constructFragment(){
         Fragment homeFragment = new HomeFragment();
+        Fragment bottomSheetFragment = new BottomSheetFragment();
         FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.add(layout.getId(), homeFragment).commit();
+        ft.add(layout.getId(), homeFragment);
+        ft.add(bottomSheetLayout.getId(), bottomSheetFragment).commit();
     }
 
     @OnClick(R.id.ride_button)
