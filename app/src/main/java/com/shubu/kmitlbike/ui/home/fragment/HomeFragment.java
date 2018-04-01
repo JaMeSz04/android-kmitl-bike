@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
 
@@ -34,7 +35,6 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
     // TODO: Rename and change types and number of parameters
     public static HomeFragment newInstance() {
         HomeFragment fragment = new HomeFragment();
-
         return fragment;
     }
 
@@ -42,7 +42,10 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Timber.i("in fragment!!!");
-
+        KMITLBikeApplication.getEventBus().getBike().subscribe( (bikes -> {
+            Timber.e("receive bike like in fragment!!!");
+            Timber.e(bikes.toString());
+        }));
     }
 
     @Override

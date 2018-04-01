@@ -6,6 +6,7 @@ import android.view.MenuItem;
 
 import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.injection.component.ActivityComponent;
+import com.shubu.kmitlbike.injection.component.BusComponent;
 import com.shubu.kmitlbike.injection.component.ConfigPersistentComponent;
 import com.shubu.kmitlbike.injection.component.DaggerConfigPersistentComponent;
 import com.shubu.kmitlbike.injection.module.ActivityModule;
@@ -27,6 +28,8 @@ import timber.log.Timber;
  */
 public abstract class BaseActivity extends AppCompatActivity {
 
+
+    protected BusComponent eventBus;
     private static final String KEY_ACTIVITY_ID = "KEY_ACTIVITY_ID";
     private static final AtomicLong NEXT_ID = new AtomicLong(0);
     private static final Map<Long, ConfigPersistentComponent> sComponentsMap = new HashMap<>();
@@ -37,7 +40,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        eventBus = KMITLBikeApplication.getEventBus();
         // Create the ActivityComponent and reuses cached ConfigPersistentComponent if this is
         // being called after a configuration change.
         mActivityId = savedInstanceState != null ?

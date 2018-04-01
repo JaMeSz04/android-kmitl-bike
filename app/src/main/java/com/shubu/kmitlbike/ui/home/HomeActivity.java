@@ -7,8 +7,10 @@ import android.os.Bundle;
 import android.widget.FrameLayout;
 
 import com.google.android.gms.maps.MapFragment;
+import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.data.model.Bike;
+import com.shubu.kmitlbike.injection.component.BusComponent;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
 import com.shubu.kmitlbike.ui.home.fragment.HomeFragment;
 
@@ -24,11 +26,12 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
 
     @Inject HomePresenter presenter;
 
+
+
     @BindView(R.id.home_frame) FrameLayout layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         activityComponent().inject(this);
         setContentView(R.layout.activity_home);
@@ -48,7 +51,7 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
 
     @Override
     public void onBikeListUpdate(List<Bike> bikes) {
-        Timber.i("bike list: " + bikes.toString());
+        this.eventBus.getBike().onNext(bikes); //publish bikes to subscribers
     }
 
     @Override
