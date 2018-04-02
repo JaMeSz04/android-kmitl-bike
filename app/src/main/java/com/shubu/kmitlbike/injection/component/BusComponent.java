@@ -12,6 +12,7 @@ import javax.inject.Singleton;
 
 import dagger.Component;
 import rx.subjects.PublishSubject;
+import com.google.zxing.Result;
 
 @Component(modules = BusModule.class)
 @Singleton
@@ -24,4 +25,6 @@ public interface BusComponent {
     PublishSubject<List<UsagePlan>> getPlan();
 
 
+    @Named(BusModule.SCANNER_PROVIDER)
+    PublishSubject<Result> getScannerCode();
 }

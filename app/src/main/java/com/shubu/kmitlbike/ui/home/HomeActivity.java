@@ -68,8 +68,10 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
                  }
         );
 
-        // TODO: 4/1/2018 currently use for dev purpose -> change it to HomeBottomSheetBehavior later
-
+        //subscribe scanner eventbus
+        eventBus.getScannerCode().subscribe( code -> {
+            presenter.onScanComplete(code);
+        });
 
         if (savedInstanceState == null)
             this.constructFragment();

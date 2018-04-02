@@ -60,8 +60,8 @@ public class ScannerFragment extends BaseFragment {
         mCodeScanner.setDecodeCallback(new DecodeCallback() {
             @Override
             public void onDecoded(@NonNull Result result) {
-
                 Timber.i(result.getText());
+                eventBus.getScannerCode().onNext(result);
             }
         });
 

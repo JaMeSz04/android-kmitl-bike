@@ -3,11 +3,12 @@ package com.shubu.kmitlbike.injection.module;
 
 import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
-
+import com.google.zxing.Result;
 import java.util.List;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
+
 
 import dagger.Module;
 import dagger.Provides;
@@ -33,7 +34,9 @@ public class BusModule {
         return PublishSubject.create();
     }
 
-
-
+    @Provides
+    @Singleton
+    @Named(SCANNER_PROVIDER)
+    static PublishSubject<Result> provideScannerCode() { return PublishSubject.create(); }
 
 }

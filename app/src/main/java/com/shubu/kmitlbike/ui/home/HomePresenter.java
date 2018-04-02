@@ -1,5 +1,6 @@
 package com.shubu.kmitlbike.ui.home;
 
+import com.google.zxing.Result;
 import com.shubu.kmitlbike.data.DataManager;
 import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.data.model.LoginResponse;
@@ -68,6 +69,10 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
                 }
             }))
         ;
+    }
+
+    public void onScanComplete(Result code){
+        Timber.i("HomePresenter on receive : " + code.getText());
     }
 
 
