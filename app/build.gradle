@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.shubu.kmitlbike"
-        minSdkVersion 18
+        minSdkVersion 19
         targetSdkVersion 23
         testInstrumentationRunner "${applicationId}.runner.RxAndroidJUnitRunner"
         versionCode 1

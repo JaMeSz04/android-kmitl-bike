@@ -98,10 +98,9 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
 
     @Override
     public void onScannerStart() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
-
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA}, 1);
-        }
+
 
         Fragment scannerFragment = new ScannerFragment();
         FragmentTransaction ft = getFragmentManager().beginTransaction();

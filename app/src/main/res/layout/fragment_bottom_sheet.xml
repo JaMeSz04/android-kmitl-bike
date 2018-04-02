@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="300dp"
-    android:background="#80000000"
+    android:background="#CCCCCC"
     tools:context=".ui.home.fragment.BottomSheetFragment">
 
     <!-- TODO: Update blank fragment layout -->
