@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/bottom_sheet_height"
-    android:background="#22FFFFFF"
     tools:context=".ui.home.fragment.BikeInfoFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -15,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_margin="16dp"
-        android:text="Button" />
+        android:text="BORROW" />
 
     <RelativeLayout
         android:id="@+id/BikeInfoContentView"

@@ -9,5 +9,5 @@
     <color name="icons">@color/white</color>
     <color name="white">#FFFFFF</color>
     <color name="divider">#B6B6B6</color>
-    <color name="shubu_transparent">#1ec3c3c3</color>
+    <color name="shubu_transparent">#EEFFFFFF</color>
 </resources>
