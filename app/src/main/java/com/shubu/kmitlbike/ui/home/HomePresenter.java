@@ -43,9 +43,9 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
                 @Override
                 public void onSuccess(List<Bike> value) {
                     Timber.e("pass presenter");
+                    mDataManager.setBikeList(value);
                     getMvpView().onBikeListUpdate(value);
                 }
-
                 @Override
                 public void onError(Throwable error) {
                     Timber.i("error: " + error.toString());
@@ -60,9 +60,9 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
             .subscribe(new SingleSubscriber<List<UsagePlan>>() {
                 @Override
                 public void onSuccess(List<UsagePlan> value) {
+                    mDataManager.setUsagePlans(value);
                     getMvpView().onUsagePlanUpdate(value);
                 }
-
                 @Override
                 public void onError(Throwable error) {
 
@@ -73,6 +73,8 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
 
     public void onScanComplete(Result code){
         Timber.i("HomePresenter on receive : " + code.getText());
+        Bike bike = mDataManager.getBikeFromScannerCode(code);
+        getMvpView().onScannerBikeUpdate(bike);
     }
 
 

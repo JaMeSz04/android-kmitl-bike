@@ -3,6 +3,8 @@ package com.shubu.kmitlbike.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.annimon.stream.Stream;
+import com.google.zxing.Result;
 import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
@@ -27,6 +29,9 @@ import timber.log.Timber;
 public class DataManager {
 
     private final Router mRouter;
+    private List<Bike> bikeList;
+    private List<UsagePlan> usagePlans;
+
 
     @Inject
     public DataManager(Router router) {
@@ -63,17 +68,21 @@ public class DataManager {
         return mRouter.getBikeList();
     }
 
-
-    public boolean hasToken(Context context){
-        SharedPreferences pref = context.getSharedPreferences("token-store", Context.MODE_PRIVATE);
-        String token = pref.getString("token","");
-        return !token.isEmpty();
+    public Bike getBikeFromScannerCode(Result code){
+        List<Bike> result = Stream.of(this.bikeList).filter( bike -> bike.getBarcode().equals(code.getText())).toList();
+        if (result.size() <= 0){ /* TODO: 4/2/2018 raise GUI error : case -> barcode not found!!! */  }
+        return result.get(0);
     }
-
-
 
     public Single<Pokemon> getPokemon(String name) {
         return mRouter.getPokemon(name);
     }
 
+    public void setBikeList(List<Bike> bikeList) {
+        this.bikeList = bikeList;
+    }
+
+    public void setUsagePlans(List<UsagePlan> usagePlans) {
+        this.usagePlans = usagePlans;
+    }
 }

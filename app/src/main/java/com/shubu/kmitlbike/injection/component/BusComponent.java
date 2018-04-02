@@ -3,6 +3,7 @@ package com.shubu.kmitlbike.injection.component;
 
 import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
+import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.injection.module.BusModule;
 
 import java.util.List;
@@ -24,7 +25,10 @@ public interface BusComponent {
     @Named(BusModule.PLAN_PROVIDER)
     PublishSubject<List<UsagePlan>> getPlan();
 
-
     @Named(BusModule.SCANNER_PROVIDER)
     PublishSubject<Result> getScannerCode();
+
+    @Named(BusModule.BIKE_STATE_PROVIDER)
+    PublishSubject<BikeState> getBikeState();
 }
+

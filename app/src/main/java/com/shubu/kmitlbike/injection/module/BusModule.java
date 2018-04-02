@@ -4,6 +4,8 @@ package com.shubu.kmitlbike.injection.module;
 import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.google.zxing.Result;
+import com.shubu.kmitlbike.data.state.BikeState;
+
 import java.util.List;
 
 import javax.inject.Named;
@@ -19,6 +21,7 @@ public class BusModule {
     public static final String BIKE_PROVIDER = "BIKE_PROVIDER";
     public static final String PLAN_PROVIDER = "PLAN_PROVIDER";
     public static final String SCANNER_PROVIDER = "SCANNER_PROVIDER";
+    public static final String BIKE_STATE_PROVIDER = "BIKE_STATE_PROVIDER";
 
     @Provides
     @Singleton
@@ -38,5 +41,10 @@ public class BusModule {
     @Singleton
     @Named(SCANNER_PROVIDER)
     static PublishSubject<Result> provideScannerCode() { return PublishSubject.create(); }
+
+    @Provides
+    @Singleton
+    @Named(BIKE_STATE_PROVIDER)
+    static PublishSubject<BikeState> provideBikeState() { return PublishSubject.create(); }
 
 }

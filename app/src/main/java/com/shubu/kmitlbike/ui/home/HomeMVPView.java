@@ -9,6 +9,7 @@ import java.util.List;
 public interface HomeMVPView extends MvpView {
     void onBikeListUpdate(List<Bike> bikes);
     void onUsagePlanUpdate(List<UsagePlan> plans);
+    void onScannerBikeUpdate(Bike bike);
 }
 
 

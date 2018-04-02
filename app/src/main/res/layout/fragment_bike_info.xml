@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/bottom_sheet_height"
+    android:background="#22FFFFFF"
+    tools:context=".ui.home.fragment.BikeInfoFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <Button
+        android:id="@+id/BikeInfoBorrowButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="16dp"
+        android:text="Button" />
+
+    <RelativeLayout
+        android:id="@+id/BikeInfoContentView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="32dp"
+            android:layout_marginTop="48dp"
+            android:orientation="vertical">
+
+
+            <TextView
+                android:id="@+id/BikeInfoTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Your bike is ready"
+                android:textAlignment="textStart"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/bikeInfoSubTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Giant Escape 3"
+                android:textAlignment="textStart"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:layout_marginTop="36dp"
+                android:text="KB002"
+                android:textAlignment="textStart"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Infinilock" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/bikeInfoImage"
+            android:layout_width="289dp"
+            android:layout_height="463dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_weight="1"
+            android:src="@drawable/giant_escape_cut" />
+
+
+    </RelativeLayout>
+
+
+</FrameLayout>

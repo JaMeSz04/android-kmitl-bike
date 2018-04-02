@@ -19,6 +19,7 @@ import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
+import com.shubu.kmitlbike.ui.home.fragment.BikeInfoFragment;
 import com.shubu.kmitlbike.ui.home.fragment.BottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.ScannerFragment;
 import com.shubu.kmitlbike.util.HomeBottomSheetBehavior;
@@ -33,7 +34,11 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import timber.log.Timber;
 
-public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragment.OnFragmentInteractionListener, BottomSheetFragment.OnFragmentInteractionListener, ScannerFragment.OnFragmentInteractionListener {
+public class HomeActivity extends BaseActivity implements HomeMVPView,
+        HomeFragment.OnFragmentInteractionListener,
+        BottomSheetFragment.OnFragmentInteractionListener,
+        ScannerFragment.OnFragmentInteractionListener,
+        BikeInfoFragment.OnFragmentInteractionListener {
 
     @Inject HomePresenter presenter;
 
@@ -42,6 +47,9 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
     @BindView(R.id.home_scanner) FrameLayout scanner;
     @BindView(R.id.sheet_content_layout) FrameLayout bottomSheetLayout;
     @BindView(R.id.HomeRideButton) FloatingActionButton fab;
+
+    private Fragment scannerFragment;
+    private BikeInfoFragment bikeInfoFragment;
 
     protected BottomSheetBehavior sheetBehavior;
 
@@ -54,6 +62,8 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
         presenter.attachView(this);
         presenter.getBikeList();
         presenter.getUsagePlan();
+
+
 
         sheetBehavior = HomeBottomSheetBehavior.from(bottomSheet);
         sheetBehavior.setBottomSheetCallback(
@@ -99,10 +109,10 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
     @Override
     public void onScannerStart() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA}, 1);
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA}, 2);
 
 
-        Fragment scannerFragment = new ScannerFragment();
+        scannerFragment = new ScannerFragment();
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.replace(scanner.getId(), scannerFragment).addToBackStack("scanner").commit();
@@ -121,10 +131,16 @@ public class HomeActivity extends BaseActivity implements HomeMVPView, HomeFragm
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
-
+    public void onScannerBikeUpdate(Bike bike) {
+        bikeInfoFragment = new BikeInfoFragment();
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+        ft.hide(scannerFragment);
+        ft.replace(bottomSheetLayout.getId(), bikeInfoFragment).commit();
     }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) { }
 
 
 }

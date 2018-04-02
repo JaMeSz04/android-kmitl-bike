@@ -121,13 +121,13 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
 
     @Override
     public void onMapReady(GoogleMap mMap) {
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
 
-
-        }
         googleMap = mMap;
-        googleMap.setMyLocationEnabled(true);
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+        else
+            googleMap.setMyLocationEnabled(true);
+
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CONSTANTS.KMITL_LOCATION, 17));
         this.updateBikeLocation();

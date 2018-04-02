@@ -120,6 +120,7 @@ dependencies {
     annotationProcessor "com.jakewharton:butterknife-compiler:$BUTTERKNIFE_VERSION"
     annotationProcessor daggerCompiler
 
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 }
 
 // Log out test results to console
