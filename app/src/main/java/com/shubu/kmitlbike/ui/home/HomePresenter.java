@@ -1,21 +1,23 @@
 package com.shubu.kmitlbike.ui.home;
 
+import android.location.Location;
+
 import com.google.zxing.Result;
 import com.shubu.kmitlbike.data.DataManager;
-import com.shubu.kmitlbike.data.model.Bike;
-import com.shubu.kmitlbike.data.model.LoginResponse;
+import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
+import com.shubu.kmitlbike.data.model.bike.BikeBorrowResponse;
+import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.base.BasePresenter;
+import com.shubu.kmitlbike.ui.common.CONSTANTS;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-import rx.Scheduler;
-import rx.Single;
 import rx.SingleSubscriber;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -24,6 +26,7 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
 
     private final DataManager mDataManager;
     private CompositeSubscription mSubscriptions;
+
 
     @Inject
     public HomePresenter(DataManager dataManager) {
@@ -34,6 +37,10 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
         super.attachView(mvpView);
         mSubscriptions = new CompositeSubscription();
     }
+    public void onDestroy(){
+        mSubscriptions.unsubscribe();
+    }
+
 
     public void getBikeList() {
         mSubscriptions.add(mDataManager.getBikeList()
@@ -74,8 +81,32 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
     public void onScanComplete(Result code){
         Timber.i("HomePresenter on receive : " + code.getText());
         Bike bike = mDataManager.getBikeFromScannerCode(code);
+        mDataManager.setUsingBike(bike);
         getMvpView().onScannerBikeUpdate(bike);
     }
+
+    public void onBorrowStart(Location location){
+        Bike bike = mDataManager.getUsingBike();
+        Timber.e("currentbike : " + bike.toString());
+        mDataManager.initializeBorrowService(bike).subscribe(new Subscriber<BikeState>() {
+            @Override
+            public void onCompleted() {
+                getMvpView().onBorrowCompleted(bike);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                // TODO: 4/3/2018 display error or someshit
+            }
+
+            @Override
+            public void onNext(BikeState s) {
+                getMvpView().onBorrowStatusUpdate(s);
+            }
+        });
+        mDataManager.performBorrow(bike,location);
+    }
+
 
 
 

@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,16 +17,13 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.R;
-import com.shubu.kmitlbike.data.model.Bike;
+import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
 import timber.log.Timber;
 
 public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
@@ -36,7 +32,6 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
     private MapView mapView;
     private GoogleMap googleMap;
     private List<Bike> bikeList;
-    private OnFragmentInteractionListener mListener;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -95,48 +90,20 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
         return rootView;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
 
     @Override
     public void onMapReady(GoogleMap mMap) {
 
         googleMap = mMap;
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-        else
-            googleMap.setMyLocationEnabled(true);
-
+        googleMap.setMyLocationEnabled(true);
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CONSTANTS.KMITL_LOCATION, 17));
         this.updateBikeLocation();
 
     }
 
-
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
 }

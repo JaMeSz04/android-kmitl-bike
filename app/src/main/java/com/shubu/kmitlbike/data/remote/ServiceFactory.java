@@ -48,6 +48,7 @@ public class ServiceFactory {
         return new OkHttpClient.Builder()
                 .addInterceptor(new AuthIntercepter())
                 .addInterceptor(httpLoggingInterceptor)
+                .addInterceptor(new ResponseIntercepter())
                 .build();
     }
 

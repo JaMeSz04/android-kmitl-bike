@@ -87,7 +87,6 @@
             android:layout_height="463dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
-            android:layout_weight="1"
             android:src="@drawable/la_green_cut" />
 
 

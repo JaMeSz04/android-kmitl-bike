@@ -1,7 +1,7 @@
 package com.shubu.kmitlbike.injection.component;
 
 
-import com.shubu.kmitlbike.data.model.Bike;
+import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.injection.module.BusModule;
@@ -30,5 +30,10 @@ public interface BusComponent {
 
     @Named(BusModule.BIKE_STATE_PROVIDER)
     PublishSubject<BikeState> getBikeState();
+
+    @Named(BusModule.BIKE_PASSWORD_PROVIDER)
+    PublishSubject<String> getBikePassword();
+
+
 }
 

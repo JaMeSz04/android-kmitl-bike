@@ -1,4 +1,4 @@
-package com.shubu.kmitlbike.data.model;
+package com.shubu.kmitlbike.data.model.bike;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.SerializedName;
