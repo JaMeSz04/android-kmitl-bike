@@ -17,19 +17,12 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import timber.log.Timber;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link BottomSheetFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link BottomSheetFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class BottomSheetFragment extends BaseFragment {
 
     @BindView(R.id.InstructionScanButton) Button scanButton;
 
-    private OnFragmentInteractionListener mListener;
+    private ScannerListener mListener;
 
     public static BottomSheetFragment newInstance(String param1, String param2) {
         BottomSheetFragment fragment = new BottomSheetFragment();
@@ -67,8 +60,8 @@ public class BottomSheetFragment extends BaseFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof ScannerListener) {
+            mListener = (ScannerListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -91,9 +84,5 @@ public class BottomSheetFragment extends BaseFragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onScannerStart();
 
-    }
 }

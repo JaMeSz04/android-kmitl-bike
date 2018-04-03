@@ -7,35 +7,45 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.shubu.kmitlbike.R;
+import com.shubu.kmitlbike.data.model.Bike;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
+
+import org.w3c.dom.Text;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link BikeInfoFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link BikeInfoFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class BikeInfoFragment extends BaseFragment {
 
     @BindView(R.id.BikeInfoTitle) TextView titleText;
+    @BindView(R.id.BikeInfoSubTitle) TextView subtitleText;
+    @BindView(R.id.BIkeInfoBikeName) TextView nameText;
+    @BindView(R.id.BikeInfoLock) TextView lockText;
+    @BindView(R.id.BikeInfoImage) ImageView bikeImage;
+    @BindView(R.id.BikeInfoScannerButton) ImageButton scanButton;
 
-    private OnFragmentInteractionListener mListener;
+    private String bikeName = "";
+    private String bikeModel = "";
+    private ScannerListener mListener;
 
     public BikeInfoFragment() {
         // Required empty public constructor
     }
 
     // TODO: Rename and change types and number of parameters
-    public static BikeInfoFragment newInstance(String param1, String param2) {
+    public static BikeInfoFragment newInstance(String bikeName, String bikeModel) {
+
         BikeInfoFragment fragment = new BikeInfoFragment();
+        Bundle args = new Bundle();
+        args.putString("name", bikeName);
+        args.putString("model", bikeModel);
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -49,6 +59,13 @@ public class BikeInfoFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            bikeName = getArguments().getString("name");
+            bikeModel = getArguments().getString("model");
+        } else {
+            // TODO: 4/3/2018  raise error bike not found!!!
+        }
+
     }
 
     @Override
@@ -63,21 +80,26 @@ public class BikeInfoFragment extends BaseFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_bike_info, container, false);
         ButterKnife.bind(this,view);
+        this.subtitleText.setText(this.bikeModel);
+        this.nameText.setText(this.bikeName);
+        this.lockText.setText(this.bikeModel.equals("GIANT Escape 3")? "InfiniLock" : "Manual Lock" );
+        this.bikeImage.setImageResource(this.bikeModel.equals("GIANT Escape 3")? R.drawable.giant_escape_cut : R.drawable.la_green_cut);
+        this.scanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onScannerStart();
+            }
+        });
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
+
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof ScannerListener) {
+            mListener = (ScannerListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -90,8 +112,4 @@ public class BikeInfoFragment extends BaseFragment {
         mListener = null;
     }
 
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
 }

@@ -44,7 +44,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/bikeInfoSubTitle"
+                android:id="@+id/BikeInfoSubTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
@@ -56,7 +56,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/BIkeInfoBikeName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
 
@@ -67,21 +67,28 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/BikeInfoLock"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Infinilock" />
 
+            <ImageButton
+                android:id="@+id/BikeInfoScannerButton"
+                android:layout_marginTop="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_code_scanner_auto_focus_off" />
+
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/bikeInfoImage"
-            android:layout_width="289dp"
+            android:id="@+id/BikeInfoImage"
+            android:layout_width="271dp"
             android:layout_height="463dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:layout_weight="1"
-            android:src="@drawable/giant_escape_cut" />
+            android:src="@drawable/la_green_cut" />
 
 
     </RelativeLayout>

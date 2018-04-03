@@ -2,6 +2,7 @@ package com.shubu.kmitlbike.ui.home;
 
 import android.Manifest;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import com.shubu.kmitlbike.ui.base.BaseActivity;
 import com.shubu.kmitlbike.ui.home.fragment.BikeInfoFragment;
 import com.shubu.kmitlbike.ui.home.fragment.BottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.ScannerFragment;
+import com.shubu.kmitlbike.ui.home.fragment.ScannerListener;
 import com.shubu.kmitlbike.util.HomeBottomSheetBehavior;
 import com.shubu.kmitlbike.ui.home.fragment.HomeFragment;
 
@@ -36,9 +38,9 @@ import timber.log.Timber;
 
 public class HomeActivity extends BaseActivity implements HomeMVPView,
         HomeFragment.OnFragmentInteractionListener,
-        BottomSheetFragment.OnFragmentInteractionListener,
-        ScannerFragment.OnFragmentInteractionListener,
-        BikeInfoFragment.OnFragmentInteractionListener {
+        ScannerListener,
+        ScannerFragment.OnFragmentInteractionListener
+        {
 
     @Inject HomePresenter presenter;
 
@@ -132,11 +134,13 @@ public class HomeActivity extends BaseActivity implements HomeMVPView,
 
     @Override
     public void onScannerBikeUpdate(Bike bike) {
-        bikeInfoFragment = new BikeInfoFragment();
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        bikeInfoFragment = BikeInfoFragment.newInstance(bike.getBikeName(), bike.getBikeModel());
+        FragmentManager manager =  getFragmentManager();
+        FragmentTransaction ft = manager.beginTransaction();
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
         ft.hide(scannerFragment);
-        ft.replace(bottomSheetLayout.getId(), bikeInfoFragment).commit();
+        manager.popBackStack();
+        ft.replace(bottomSheetLayout.getId(), bikeInfoFragment).addToBackStack("bike-ready").commit();
     }
 
     @Override
