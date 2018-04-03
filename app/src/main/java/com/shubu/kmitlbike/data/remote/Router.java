@@ -1,11 +1,14 @@
 package com.shubu.kmitlbike.data.remote;
 
 
-import com.shubu.kmitlbike.data.model.Bike;
+import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.data.model.NamedResource;
 import com.shubu.kmitlbike.data.model.Pokemon;
+import com.shubu.kmitlbike.data.model.UsagePlan;
+import com.shubu.kmitlbike.data.model.bike.BikeBorrowRequest;
+import com.shubu.kmitlbike.data.model.bike.BikeBorrowResponse;
 
 import java.util.List;
 
@@ -29,6 +32,13 @@ public interface Router {
 
     @GET("api/v1/bikes/list")
     Single<List<Bike>> getBikeList();
+
+    @GET("api/v1/bikes/plans/list")
+    Single<List<UsagePlan>> getUsagePlan();
+
+    @POST("api/v1/bikes/{id}/borrow")
+    Single<BikeBorrowResponse> borrowBike(@Path("id") int id, @Body BikeBorrowRequest request);
+
 
     class PokemonListResponse {
         public List<NamedResource> results;

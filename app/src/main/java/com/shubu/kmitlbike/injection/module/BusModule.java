@@ -1,25 +1,57 @@
 package com.shubu.kmitlbike.injection.module;
 
 
-import com.shubu.kmitlbike.data.model.Bike;
+import com.shubu.kmitlbike.data.model.bike.Bike;
+import com.shubu.kmitlbike.data.model.UsagePlan;
+import com.google.zxing.Result;
+import com.shubu.kmitlbike.data.state.BikeState;
 
 import java.util.List;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+
 import dagger.Module;
 import dagger.Provides;
+import rx.Single;
 import rx.subjects.PublishSubject;
 
 @Module
 public class BusModule {
-    public static final String HOME_PROVIDER = "HOME_PROVIDER";
+    public static final String BIKE_PROVIDER = "BIKE_PROVIDER";
+    public static final String PLAN_PROVIDER = "PLAN_PROVIDER";
+    public static final String SCANNER_PROVIDER = "SCANNER_PROVIDER";
+    public static final String BIKE_STATE_PROVIDER = "BIKE_STATE_PROVIDER";
+    public static final String BIKE_PASSWORD_PROVIDER = "BIKE_PASSWORD_PROVIDER";
 
     @Provides
     @Singleton
-    @Named(HOME_PROVIDER)
+    @Named(BIKE_PROVIDER)
     static PublishSubject<List<Bike>> provideBike() {
         return PublishSubject.create();
     }
+
+    @Provides
+    @Singleton
+    @Named(PLAN_PROVIDER)
+    static PublishSubject<List<UsagePlan>> providePlan() {
+        return PublishSubject.create();
+    }
+
+    @Provides
+    @Singleton
+    @Named(SCANNER_PROVIDER)
+    static PublishSubject<Result> provideScannerCode() { return PublishSubject.create(); }
+
+    @Provides
+    @Singleton
+    @Named(BIKE_STATE_PROVIDER)
+    static PublishSubject<BikeState> provideBikeState() { return PublishSubject.create(); }
+
+    @Provides
+    @Singleton
+    @Named(BIKE_PASSWORD_PROVIDER)
+    static PublishSubject<String> provideBikePassword() { return PublishSubject.create(); }
+
 }
