@@ -9,6 +9,7 @@ import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.model.bike.BikeBorrowResponse;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.base.BasePresenter;
+import com.shubu.kmitlbike.ui.base.MvpView;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
 
 import java.util.List;
@@ -118,19 +119,22 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
     }
 
     public void updateLocation(Location location){
-        Single<Response> response = mDataManager.updateLocation(location);
+        Single<Object> response = mDataManager.updateLocation(location);
         if (response == null || location.equals(mDataManager.getCurrentLocation())){
             return; //hypothesis : case F | T is not possible
         }
-        response.subscribe(new SingleSubscriber<Response>() {
+        response.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new SingleSubscriber<Object>() {
+
             @Override
-            public void onSuccess(Response value) {
+            public void onSuccess(Object value) {
                 getMvpView().onLocationUpdate(location);
             }
 
             @Override
             public void onError(Throwable error) {
-                Timber.e("error on update location presetner : " + error.toString());
+                Timber.e(error);
             }
         });
     }

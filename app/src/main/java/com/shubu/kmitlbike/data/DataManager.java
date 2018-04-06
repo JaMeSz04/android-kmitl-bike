@@ -150,7 +150,7 @@ public class DataManager {
         return this.currentLocation;
     }
 
-    public Single<Response> updateLocation(Location location){
+    public Single<Object> updateLocation(Location location){
         if (this.isBetterLocation(location, this.currentLocation)){
             return mRouter.updateTrackingLocation(LocationAdapter.makeLocationForm(location));
         }

@@ -28,6 +28,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.data.model.bike.Bike;
@@ -93,7 +94,7 @@ public class HomeActivity extends BaseActivity implements
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         client = LocationServices.getFusedLocationProviderClient(this);
         this.initializeServicesFacade();
-        this.startLocationUpdate();
+
         if (savedInstanceState == null)
             this.constructFragment();
 
@@ -103,30 +104,6 @@ public class HomeActivity extends BaseActivity implements
         this.initiatePresenter();
         this.initiateBottomSheet();
         this.initiateEventBus();
-    }
-
-
-
-    private void startLocationUpdate(){
-        LocationRequest request = LocationRequest.create();
-        request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        request.setInterval(5000);
-
-        try {
-            client.requestLocationUpdates(request, new LocationCallback(){
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    if (locationResult == null)
-                        return;
-                    Stream.of(locationResult.getLocations()).forEach( location -> {
-
-                        Timber.i(location.toString());
-                    });
-                }
-            }, null);
-        } catch (SecurityException e){
-            Timber.e(e);
-        }
     }
 
     private void initiatePresenter(){
@@ -239,11 +216,13 @@ public class HomeActivity extends BaseActivity implements
             bikeStatusFragment = StatusFragment.newInstance(null);
             ft.replace(bottomSheetLayout.getId(), bikeStatusFragment).commit();
 
-            Location lastestLocation = client.getLastLocation().getResult();
-
-            presenter.onBorrowStart(lastestLocation);
-
-
+            client.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null)
+                        presenter.onBorrowStart(location);
+                }
+            });
         } catch (SecurityException e){
             Timber.e(e.toString());
         }
@@ -290,7 +269,29 @@ public class HomeActivity extends BaseActivity implements
 
     @Override //event bus method
     public void onLocationUpdate(Location location) {
+        Timber.i("new locaton : " + location.toString());
         eventBus.getLocation().onNext(location);
+    }
+
+    private void startLocationUpdate(){
+        LocationRequest request = LocationRequest.create();
+        request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        request.setInterval(5000);
+
+        try {
+            client.requestLocationUpdates(request, new LocationCallback(){
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    if (locationResult == null)
+                        return;
+                    Stream.of(locationResult.getLocations()).forEach( location -> {
+                        presenter.updateLocation(location);
+                    });
+                }
+            }, null);
+        } catch (SecurityException e){
+            Timber.e(e);
+        }
     }
 
     @Override

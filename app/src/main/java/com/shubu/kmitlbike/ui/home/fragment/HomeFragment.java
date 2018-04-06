@@ -28,6 +28,7 @@ import com.shubu.kmitlbike.ui.common.CONSTANTS;
 
 import java.util.List;
 
+import rx.Subscriber;
 import timber.log.Timber;
 
 public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
@@ -60,8 +61,17 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
             this.bikeList = bikes;
         }));
 
-        eventBus.getLocation().subscribe( location -> {
-            this.updateTrackingLocation(location);
+        eventBus.getLocation().subscribe(new Subscriber<Location>() {
+            @Override
+            public void onCompleted() { }
+
+            @Override
+            public void onError(Throwable e) { }
+
+            @Override
+            public void onNext(Location location) {
+                updateTrackingLocation(location);
+            }
         });
     }
 
