@@ -25,6 +25,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import retrofit2.Response;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -75,6 +76,10 @@ public class DataManager {
 
     public Single<List<Bike>> getBikeList(){
         return mRouter.getBikeList();
+    }
+
+    public Single<Response> performReturn(Bike bike, Location location){
+        return mRouter.returnBike(bike.getId(), LocationAdapter.makeLocationForm(location));
     }
 
     public Bike getBikeFromScannerCode(Result code){

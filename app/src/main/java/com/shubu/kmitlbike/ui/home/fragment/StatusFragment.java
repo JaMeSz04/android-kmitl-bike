@@ -1,5 +1,6 @@
 package com.shubu.kmitlbike.ui.home.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,7 @@ public class StatusFragment extends BaseFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String MAC_ADDRESS = "mac-address";
+    private StatusListener mListener;
 
     // TODO: Rename and change types of parameters
     private String macAddress = null;
@@ -57,6 +59,12 @@ public class StatusFragment extends BaseFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_status, container, false);
         ButterKnife.bind(this, view);
+        this.confirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onStatusBorrowCompleted();
+            }
+        });
         this.confirmButton.setVisibility(View.INVISIBLE);
 
         eventBus.getBikeState().subscribe( state -> {
@@ -67,20 +75,27 @@ public class StatusFragment extends BaseFragment {
             this.progressBar.setVisibility(View.INVISIBLE);
             this.statusText.setText("Your bike password : " + password);
             this.confirmButton.setVisibility(View.VISIBLE);
-            this.confirmButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
 
-                }
-            });
         });
 
         return view;
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof StatusListener) {
+            mListener = (StatusListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
+        mListener = null;
 
     }
 

@@ -9,9 +9,11 @@ import com.shubu.kmitlbike.data.model.Pokemon;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.model.bike.BikeBorrowRequest;
 import com.shubu.kmitlbike.data.model.bike.BikeBorrowResponse;
+import com.shubu.kmitlbike.data.model.bike.Location;
 
 import java.util.List;
 
+import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -38,6 +40,9 @@ public interface Router {
 
     @POST("api/v1/bikes/{id}/borrow")
     Single<BikeBorrowResponse> borrowBike(@Path("id") int id, @Body BikeBorrowRequest request);
+
+    @POST("api/v1/bikes/{id}/return")
+    Single<Response> returnBike(@Path("id") int id, @Body Location location);
 
 
     class PokemonListResponse {
