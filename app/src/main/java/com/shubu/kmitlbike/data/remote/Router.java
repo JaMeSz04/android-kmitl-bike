@@ -44,6 +44,9 @@ public interface Router {
     @POST("api/v1/bikes/{id}/return")
     Single<Response> returnBike(@Path("id") int id, @Body Location location);
 
+    @POST("api/v1/bikes/update")
+    Single<Response> updateTrackingLocation(@Body Location location);
+
 
     class PokemonListResponse {
         public List<NamedResource> results;

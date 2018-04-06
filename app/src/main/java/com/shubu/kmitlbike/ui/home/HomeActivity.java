@@ -119,6 +119,7 @@ public class HomeActivity extends BaseActivity implements
                     if (locationResult == null)
                         return;
                     Stream.of(locationResult.getLocations()).forEach( location -> {
+
                         Timber.i(location.toString());
                     });
                 }
@@ -287,9 +288,9 @@ public class HomeActivity extends BaseActivity implements
 
     //LOCATION SERVICE
 
-    @Override
+    @Override //event bus method
     public void onLocationUpdate(Location location) {
-
+        eventBus.getLocation().onNext(location);
     }
 
     @Override

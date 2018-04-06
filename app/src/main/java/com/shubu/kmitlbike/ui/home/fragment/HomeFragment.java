@@ -3,6 +3,8 @@ package com.shubu.kmitlbike.ui.home.fragment;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -17,6 +19,8 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
@@ -32,6 +36,7 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
     private MapView mapView;
     private GoogleMap googleMap;
     private List<Bike> bikeList;
+    private LatLng prevLocation;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -54,6 +59,21 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
         eventBus.getBike().subscribe( (bikes -> {
             this.bikeList = bikes;
         }));
+
+        eventBus.getLocation().subscribe( location -> {
+            this.updateTrackingLocation(location);
+        });
+    }
+
+    private void updateTrackingLocation(Location location){
+
+        Polyline line = this.googleMap.addPolyline(
+                new PolylineOptions().add(
+                        this.prevLocation,
+                        new LatLng(location.getLatitude(), location.getLongitude())
+                ).width(2).color(Color.GREEN).geodesic(true)
+        );
+        this.prevLocation = new LatLng(location.getLatitude(), location.getLongitude());
     }
 
     private void updateBikeLocation(){
@@ -97,12 +117,15 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
 
     @Override
     public void onMapReady(GoogleMap mMap) {
-
-        googleMap = mMap;
-        googleMap.setMyLocationEnabled(true);
-        googleMap.getUiSettings().setMyLocationButtonEnabled(false);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CONSTANTS.KMITL_LOCATION, 17));
-        this.updateBikeLocation();
+        try {
+            googleMap = mMap;
+            googleMap.setMyLocationEnabled(true);
+            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CONSTANTS.KMITL_LOCATION, 17));
+            this.updateBikeLocation();
+        } catch ( SecurityException e){
+            Timber.e(e);
+        }
 
     }
 

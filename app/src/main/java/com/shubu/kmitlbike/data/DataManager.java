@@ -37,11 +37,13 @@ import timber.log.Timber;
 @Singleton
 public class DataManager {
 
+    private static final int TWO_MINUTES = 1000 * 60 * 2;
     private final Router mRouter;
     private List<Bike> bikeList;
     private Bike usingBike;
     private List<UsagePlan> usagePlans;
     private PublishSubject<BikeState> usageStatus;
+    private Location currentLocation = null;
 
     @Inject
     public DataManager(Router router) {
@@ -142,5 +144,65 @@ public class DataManager {
 
     public void setUsingBike(Bike usingBike) {
         this.usingBike = usingBike;
+    }
+
+    public Location getCurrentLocation(){
+        return this.currentLocation;
+    }
+
+    public Single<Response> updateLocation(Location location){
+        if (this.isBetterLocation(location, this.currentLocation)){
+            return mRouter.updateTrackingLocation(LocationAdapter.makeLocationForm(location));
+        }
+        return null;
+    }
+
+    protected boolean isBetterLocation(Location location, Location currentBestLocation) {
+        if (currentBestLocation == null) {
+            // A new location is always better than no location
+            return true;
+        }
+
+        // Check whether the new location fix is newer or older
+        long timeDelta = location.getTime() - currentBestLocation.getTime();
+        boolean isSignificantlyNewer = timeDelta > TWO_MINUTES;
+        boolean isSignificantlyOlder = timeDelta < -TWO_MINUTES;
+        boolean isNewer = timeDelta > 0;
+
+        // If it's been more than two minutes since the current location, use the new location
+        // because the user has likely moved
+        if (isSignificantlyNewer) {
+            return true;
+            // If the new location is more than two minutes older, it must be worse
+        } else if (isSignificantlyOlder) {
+            return false;
+        }
+
+        // Check whether the new location fix is more or less accurate
+        int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
+        boolean isLessAccurate = accuracyDelta > 0;
+        boolean isMoreAccurate = accuracyDelta < 0;
+        boolean isSignificantlyLessAccurate = accuracyDelta > 200;
+
+        // Check if the old and new location are from the same provider
+        boolean isFromSameProvider = isSameProvider(location.getProvider(),
+                currentBestLocation.getProvider());
+
+        // Determine location quality using a combination of timeliness and accuracy
+        if (isMoreAccurate) {
+            return true;
+        } else if (isNewer && !isLessAccurate) {
+            return true;
+        } else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isSameProvider(String provider1, String provider2) {
+        if (provider1 == null) {
+            return provider2 == null;
+        }
+        return provider1.equals(provider2);
     }
 }

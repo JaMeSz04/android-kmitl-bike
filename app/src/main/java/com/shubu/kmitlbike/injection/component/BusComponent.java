@@ -1,6 +1,8 @@
 package com.shubu.kmitlbike.injection.component;
 
 
+import android.location.Location;
+
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.state.BikeState;
@@ -33,6 +35,9 @@ public interface BusComponent {
 
     @Named(BusModule.BIKE_PASSWORD_PROVIDER)
     PublishSubject<String> getBikePassword();
+
+    @Named(BusModule.LOCATION_PROVIDER)
+    PublishSubject<Location> getLocation();
 
 
 }
