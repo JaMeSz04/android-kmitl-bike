@@ -20,6 +20,16 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import com.annimon.stream.Stream;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
@@ -32,6 +42,7 @@ import com.shubu.kmitlbike.ui.home.fragment.BottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.ScannerFragment;
 import com.shubu.kmitlbike.ui.home.fragment.ScannerListener;
 import com.shubu.kmitlbike.ui.home.fragment.StatusFragment;
+import com.shubu.kmitlbike.ui.home.fragment.StatusListener;
 import com.shubu.kmitlbike.util.HomeBottomSheetBehavior;
 import com.shubu.kmitlbike.ui.home.fragment.HomeFragment;
 
@@ -48,21 +59,28 @@ import timber.log.Timber;
 public class HomeActivity extends BaseActivity implements
         HomeMVPView,
         ScannerListener,
-        LocationListener,
-        BorrowListener {
+        BorrowListener,
+        StatusListener,
+        LocationListener {
 
-    @Inject HomePresenter presenter;
+    @Inject
+    HomePresenter presenter;
 
-    @BindView(R.id.home_frame) FrameLayout layout;
-    @BindView(R.id.bottom_sheet) LinearLayout bottomSheet;
-    @BindView(R.id.home_scanner) FrameLayout scanner;
-    @BindView(R.id.sheet_content_layout) FrameLayout bottomSheetLayout;
-    @BindView(R.id.HomeRideButton) FloatingActionButton fab;
+    @BindView(R.id.home_frame)
+    FrameLayout layout;
+    @BindView(R.id.bottom_sheet)
+    LinearLayout bottomSheet;
+    @BindView(R.id.home_scanner)
+    FrameLayout scanner;
+    @BindView(R.id.sheet_content_layout)
+    FrameLayout bottomSheetLayout;
+    @BindView(R.id.HomeRideButton)
+    FloatingActionButton fab;
 
     private Fragment scannerFragment;
     private BikeInfoFragment bikeInfoFragment;
     private StatusFragment bikeStatusFragment;
-    private LocationManager locationManager;
+    private FusedLocationProviderClient client;
     protected BottomSheetBehavior sheetBehavior;
 
 
@@ -72,27 +90,30 @@ public class HomeActivity extends BaseActivity implements
         activityComponent().inject(this);
         setContentView(R.layout.activity_home);
         ButterKnife.bind(this);
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
+        client = LocationServices.getFusedLocationProviderClient(this);
+        this.initializeServicesFacade();
 
+        if (savedInstanceState == null)
+            this.constructFragment();
+
+    }
+
+    private void initializeServicesFacade() {
+        this.initiatePresenter();
+        this.initiateBottomSheet();
+        this.initiateEventBus();
+    }
+
+    private void initiatePresenter(){
         presenter.attachView(this);
         presenter.getBikeList();
         presenter.getUsagePlan();
-        sheetBehavior = HomeBottomSheetBehavior.from(bottomSheet);
-        sheetBehavior.setBottomSheetCallback(
-            new BottomSheetBehavior.BottomSheetCallback() {
-                 @Override
-                 public void onStateChanged(@NonNull View bottomSheet, int newState) { }
 
-                 @Override
-                 public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                     fab.animate().scaleX(1 - slideOffset).scaleY(1 - slideOffset).setDuration(0).start();
-                 }
-             }
-        );
+    }
 
+    private void initiateEventBus(){
         //subscribe scanner eventbus
         eventBus.getScannerCode().subscribe( code -> {
             presenter.onScanComplete(code);
@@ -107,12 +128,21 @@ public class HomeActivity extends BaseActivity implements
             @Override public void onError(Throwable e) {}
             @Override public void onNext(BikeState bikeState) {}
         });
+    }
 
-        this.locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+    private void initiateBottomSheet(){
+        sheetBehavior = HomeBottomSheetBehavior.from(bottomSheet);
+        sheetBehavior.setBottomSheetCallback(
+                new BottomSheetBehavior.BottomSheetCallback() {
+                    @Override
+                    public void onStateChanged(@NonNull View bottomSheet, int newState) { }
 
-        if (savedInstanceState == null)
-            this.constructFragment();
-
+                    @Override
+                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                        fab.animate().scaleX(1 - slideOffset).scaleY(1 - slideOffset).setDuration(0).start();
+                    }
+                }
+        );
     }
 
     @Override
@@ -185,11 +215,14 @@ public class HomeActivity extends BaseActivity implements
             ft.hide(bikeInfoFragment);
             bikeStatusFragment = StatusFragment.newInstance(null);
             ft.replace(bottomSheetLayout.getId(), bikeStatusFragment).commit();
-            Location lastestLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-            presenter.onBorrowStart(lastestLocation);
-
-
+            client.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null)
+                        presenter.onBorrowStart(location);
+                }
+            });
         } catch (SecurityException e){
             Timber.e(e.toString());
         }
@@ -206,6 +239,7 @@ public class HomeActivity extends BaseActivity implements
         switch (bike.getBikeModel()){
             case CONSTANTS.GIANT_ESCAPE:
                 eventBus.getBikeState().onCompleted();
+                sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 //collapse bottomsheet
                 break;
             case CONSTANTS.LA_GREEN:
@@ -214,10 +248,50 @@ public class HomeActivity extends BaseActivity implements
         }
     }
 
+    @Override
+    public void onStatusBorrowCompleted() { //manual bike event trigger!
+        sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        // TODO: 4/5/2018  start tracking
+        this.startLocationUpdate();
+//        LocationRequest mLocationRequest = LocationRequest.create();
+//        mLocationRequest.setInterval(5000);
+//        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+//
+//        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest);
+//        Task<LocationSettingsResponse> task = LocationServices.getSettingsClient(this).checkLocationSettings(builder.build());
+//
+    }
+
+    //END BIKE BOROW/RETURN
+
+
     //LOCATION SERVICE
 
-    @Override
+    @Override //event bus method
     public void onLocationUpdate(Location location) {
+        Timber.i("new locaton : " + location.toString());
+        eventBus.getLocation().onNext(location);
+    }
+
+    private void startLocationUpdate(){
+        LocationRequest request = LocationRequest.create();
+        request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        request.setInterval(5000);
+
+        try {
+            client.requestLocationUpdates(request, new LocationCallback(){
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    if (locationResult == null)
+                        return;
+                    Stream.of(locationResult.getLocations()).forEach( location -> {
+                        presenter.updateLocation(location);
+                    });
+                }
+            }, null);
+        } catch (SecurityException e){
+            Timber.e(e);
+        }
     }
 
     @Override
@@ -239,6 +313,4 @@ public class HomeActivity extends BaseActivity implements
     public void onProviderDisabled(String provider) {
 
     }
-
-
 }

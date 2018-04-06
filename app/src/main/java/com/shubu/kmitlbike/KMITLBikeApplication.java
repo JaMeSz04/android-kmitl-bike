@@ -3,6 +3,8 @@ package com.shubu.kmitlbike;
 import android.app.Application;
 import android.content.Context;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.orhanobut.hawk.Hawk;
 import com.shubu.kmitlbike.injection.component.ApplicationComponent;
 import com.shubu.kmitlbike.injection.component.BusComponent;
@@ -27,6 +29,8 @@ public class KMITLBikeApplication extends Application  {
             Timber.plant(new Timber.DebugTree());
         }
     }
+
+
 
     public static BusComponent getEventBus(){
         return eventBus;

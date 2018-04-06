@@ -9,12 +9,15 @@ import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.model.bike.BikeBorrowResponse;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.base.BasePresenter;
+import com.shubu.kmitlbike.ui.base.MvpView;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import retrofit2.Response;
+import rx.Single;
 import rx.SingleSubscriber;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -106,6 +109,38 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
         });
         mDataManager.performBorrow(bike,location);
     }
+
+    public void onReturnStart(Location location){
+        Bike bike = mDataManager.getUsingBike();
+        Timber.i("current bike : " + bike.toString());
+        mDataManager.performReturn(bike, location).subscribe( response -> {
+            Timber.i(response.toString());
+        });
+    }
+
+    public void updateLocation(Location location){
+        Single<Object> response = mDataManager.updateLocation(location);
+        if (response == null || location.equals(mDataManager.getCurrentLocation())){
+            return; //hypothesis : case F | T is not possible
+        }
+        response.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new SingleSubscriber<Object>() {
+
+            @Override
+            public void onSuccess(Object value) {
+                getMvpView().onLocationUpdate(location);
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                Timber.e(error);
+            }
+        });
+    }
+
+
+
 
 
 
