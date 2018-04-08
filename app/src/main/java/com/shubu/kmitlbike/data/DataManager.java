@@ -4,6 +4,9 @@ import android.location.Location;
 
 import com.annimon.stream.Stream;
 import com.google.zxing.Result;
+import com.polidea.rxandroidble2.RxBleClient;
+import com.polidea.rxandroidble2.scan.ScanResult;
+import com.polidea.rxandroidble2.scan.ScanSettings;
 import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.data.adapter.LocationAdapter;
 import com.shubu.kmitlbike.data.model.bike.Bike;
@@ -27,7 +30,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import retrofit2.Response;
+import io.reactivex.Observable;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -206,5 +209,12 @@ public class DataManager {
             return provider2 == null;
         }
         return provider1.equals(provider2);
+    }
+
+    public Observable<ScanResult> searchLock(String encryptedLock){
+        RxBleClient bluetooth = KMITLBikeApplication.getBluetooth();
+        return bluetooth.scanBleDevices(
+            new ScanSettings.Builder().build()
+        );
     }
 }

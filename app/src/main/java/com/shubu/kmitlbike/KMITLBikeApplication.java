@@ -27,7 +27,6 @@ public class KMITLBikeApplication extends Application  {
         Hawk.init(this.getApplicationContext()).build();
         eventBus = DaggerBusComponent.create();
         bluetooth = RxBleClient.create(this.getApplicationContext());
-
         //BluetoothComponent bluetooth = DaggerBluetoothComponent.builder().build();
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
