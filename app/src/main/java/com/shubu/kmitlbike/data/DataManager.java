@@ -31,6 +31,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -76,6 +77,8 @@ public class DataManager {
         return mRouter.login(new LoginForm(username, password));
 
     }
+
+    //BIKE MANAGER
 
     public Single<List<UsagePlan>> getUsagePlan(){
         return mRouter.getUsagePlan();
@@ -128,6 +131,7 @@ public class DataManager {
                 switch (bike.getBikeModel()){
                     case CONSTANTS.GIANT_ESCAPE:
                         // TODO: 4/3/2018 bluetooth service
+                        initiateBluetoothService(value);
                         break;
                     case CONSTANTS.LA_GREEN:
                         usageStatus.onCompleted();
@@ -150,6 +154,9 @@ public class DataManager {
     public void setUsingBike(Bike usingBike) {
         this.usingBike = usingBike;
     }
+
+
+    //LOCATION MANAGER
 
     public Location getCurrentLocation(){
         return this.currentLocation;
@@ -211,10 +218,36 @@ public class DataManager {
         return provider1.equals(provider2);
     }
 
-    public Observable<ScanResult> searchLock(String encryptedLock){
-        RxBleClient bluetooth = KMITLBikeApplication.getBluetooth();
-        return bluetooth.scanBleDevices(
-            new ScanSettings.Builder().build()
-        );
+
+    //BLUETOOTH MANAGER
+
+
+    private void initiateBluetoothService(BikeBorrowResponse value){
+        usageStatus.onNext(BikeState.BORROW_SCAN_START);
+        Disposable scannerDisposable = this.searchLock(value.getMessage());
     }
+
+    private Disposable searchLock(String encryptedLock){
+        RxBleClient bluetooth = KMITLBikeApplication.getBluetooth();
+        Disposable bluetoothScanSubscriber = bluetooth.scanBleDevices(new ScanSettings.Builder().build())
+                .subscribe(
+                scanResult -> {
+                    Timber.i(scanResult.toString());
+                    usageStatus.onNext(BikeState.PAIRING);
+                },
+                throwable -> {
+                    Timber.e(throwable);
+                }
+        );
+        return bluetoothScanSubscriber;
+    }
+
+
+
+
+
+
+
+
+
 }
