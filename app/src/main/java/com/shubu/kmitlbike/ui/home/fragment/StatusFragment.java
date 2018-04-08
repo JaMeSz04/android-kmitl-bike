@@ -10,8 +10,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.shubu.kmitlbike.R;
-import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.StatusListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

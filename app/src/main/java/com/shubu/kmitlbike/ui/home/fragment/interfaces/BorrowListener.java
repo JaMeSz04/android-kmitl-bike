@@ -1,4 +1,4 @@
-package com.shubu.kmitlbike.ui.home.fragment;
+package com.shubu.kmitlbike.ui.home.fragment.interfaces;
 
 import com.shubu.kmitlbike.data.model.bike.Bike;
 

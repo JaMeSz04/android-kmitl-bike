@@ -16,6 +16,7 @@ public interface HomeMVPView extends MvpView {
     void onLocationUpdate(Location location);
     void onBorrowStatusUpdate(BikeState status);
     void onBorrowCompleted(Bike bike);
+    void onReturnCompleted();
 }
 
 

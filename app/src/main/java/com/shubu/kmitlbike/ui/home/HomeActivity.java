@@ -4,12 +4,9 @@ import android.Manifest;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
@@ -26,23 +23,23 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
+import com.shubu.kmitlbike.ui.base.BaseFragment;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
 import com.shubu.kmitlbike.ui.home.fragment.BikeInfoFragment;
-import com.shubu.kmitlbike.ui.home.fragment.BorrowListener;
+import com.shubu.kmitlbike.ui.home.fragment.TrackingFragment;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.BorrowListener;
 import com.shubu.kmitlbike.ui.home.fragment.BottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.ScannerFragment;
-import com.shubu.kmitlbike.ui.home.fragment.ScannerListener;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.ReturnListener;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.ScannerListener;
 import com.shubu.kmitlbike.ui.home.fragment.StatusFragment;
-import com.shubu.kmitlbike.ui.home.fragment.StatusListener;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.StatusListener;
 import com.shubu.kmitlbike.util.HomeBottomSheetBehavior;
 import com.shubu.kmitlbike.ui.home.fragment.HomeFragment;
 
@@ -61,7 +58,7 @@ public class HomeActivity extends BaseActivity implements
         ScannerListener,
         BorrowListener,
         StatusListener,
-        LocationListener {
+        ReturnListener {
 
     @Inject
     HomePresenter presenter;
@@ -78,8 +75,11 @@ public class HomeActivity extends BaseActivity implements
     FloatingActionButton fab;
 
     private Fragment scannerFragment;
-    private BikeInfoFragment bikeInfoFragment;
-    private StatusFragment bikeStatusFragment;
+    private Fragment bikeInfoFragment;
+    private Fragment bikeStatusFragment;
+    private Fragment trackingFragment;
+    private Fragment bottomSheetFragment;
+    private LocationCallback locationHandler;
     private FusedLocationProviderClient client;
     protected BottomSheetBehavior sheetBehavior;
 
@@ -90,6 +90,7 @@ public class HomeActivity extends BaseActivity implements
         activityComponent().inject(this);
         setContentView(R.layout.activity_home);
         ButterKnife.bind(this);
+        locationHandler = new Locationhandler();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         client = LocationServices.getFusedLocationProviderClient(this);
@@ -145,19 +146,21 @@ public class HomeActivity extends BaseActivity implements
         );
     }
 
+    private void constructFragment(){
+        Fragment homeFragment = new HomeFragment();
+        bottomSheetFragment = new BottomSheetFragment();
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.add(layout.getId(), homeFragment);
+        ft.add(bottomSheetLayout.getId(), bottomSheetFragment).commit();
+    }
+
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         presenter.onDestroy();
     }
 
-    private void constructFragment(){
-        Fragment homeFragment = new HomeFragment();
-        Fragment bottomSheetFragment = new BottomSheetFragment();
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.add(layout.getId(), homeFragment);
-        ft.add(bottomSheetLayout.getId(), bottomSheetFragment).commit();
-    }
 
     @OnClick(R.id.HomeRideButton)
     public void toggleBottomSheet(){
@@ -250,17 +253,45 @@ public class HomeActivity extends BaseActivity implements
 
     @Override
     public void onStatusBorrowCompleted() { //manual bike event trigger!
+        FragmentManager manager =  getFragmentManager();
+        FragmentTransaction ft = manager.beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        ft.hide(bikeStatusFragment);
+        trackingFragment = TrackingFragment.newInstance("", 60);
+        ft.replace(bottomSheetLayout.getId(), trackingFragment).commit();
         sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         // TODO: 4/5/2018  start tracking
         this.startLocationUpdate();
-//        LocationRequest mLocationRequest = LocationRequest.create();
-//        mLocationRequest.setInterval(5000);
-//        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-//
-//        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest);
-//        Task<LocationSettingsResponse> task = LocationServices.getSettingsClient(this).checkLocationSettings(builder.build());
-//
     }
+
+    @Override
+    public void onReturn() {
+
+        client.removeLocationUpdates(locationHandler);
+        try {
+            client.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null)
+                        presenter.onReturnStart(location);
+                }
+            });
+        } catch (SecurityException e){
+            Timber.e(e);
+        }
+    }
+
+
+    @Override
+    public void onReturnCompleted() {
+        FragmentManager manager =  getFragmentManager();
+        FragmentTransaction ft = manager.beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        ft.hide(trackingFragment);
+        ft.replace(bottomSheetLayout.getId(), bottomSheetFragment).commit();
+        sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
 
     //END BIKE BOROW/RETURN
 
@@ -279,38 +310,26 @@ public class HomeActivity extends BaseActivity implements
         request.setInterval(5000);
 
         try {
-            client.requestLocationUpdates(request, new LocationCallback(){
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    if (locationResult == null)
-                        return;
-                    Stream.of(locationResult.getLocations()).forEach( location -> {
-                        presenter.updateLocation(location);
-                    });
-                }
-            }, null);
+            client.requestLocationUpdates(request, locationHandler , null);
         } catch (SecurityException e){
             Timber.e(e);
         }
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
 
+    private class Locationhandler extends LocationCallback {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            if (locationResult == null)
+                return;
+            Stream.of(locationResult.getLocations()).forEach( location -> {
+                presenter.updateLocation(location);
+            });
+        }
     }
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
 
-    }
 
-    @Override
-    public void onProviderEnabled(String provider) {
 
-    }
 
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }
 }

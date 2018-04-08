@@ -36,4 +36,6 @@ public class ApplicationModule {
     Router provideMvpBoilerplateService() {
         return ServiceFactory.createClient();
     }
+
+
 }

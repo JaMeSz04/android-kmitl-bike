@@ -7,6 +7,7 @@ import com.shubu.kmitlbike.data.DataManager;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.model.bike.BikeBorrowResponse;
+import com.shubu.kmitlbike.data.model.bike.BikeReturnResponse;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.base.BasePresenter;
 import com.shubu.kmitlbike.ui.base.MvpView;
@@ -99,7 +100,8 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
 
             @Override
             public void onError(Throwable e) {
-                // TODO: 4/3/2018 display error or someshit
+                Timber.e("borrow error!!! returning...");
+                onReturnStart(location);
             }
 
             @Override
@@ -113,9 +115,21 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
     public void onReturnStart(Location location){
         Bike bike = mDataManager.getUsingBike();
         Timber.i("current bike : " + bike.toString());
-        mDataManager.performReturn(bike, location).subscribe( response -> {
-            Timber.i(response.toString());
-        });
+        mSubscriptions.add(mDataManager.performReturn(bike, location)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe(new SingleSubscriber<BikeReturnResponse>() {
+                @Override
+                public void onSuccess(BikeReturnResponse value) {
+                    getMvpView().onReturnCompleted();
+                }
+
+                @Override
+                public void onError(Throwable error) {
+                    Timber.e(error);
+                }
+            }));
+
     }
 
     public void updateLocation(Location location){

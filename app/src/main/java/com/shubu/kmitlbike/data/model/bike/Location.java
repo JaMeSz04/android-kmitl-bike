@@ -20,8 +20,8 @@ public class Location{
 		return latitude;
 	}
 
-	public void setLongitude(double longtitude){
-		this.longitude = longtitude;
+	public void setLongitude(double longitude){
+		this.longitude = longitude;
 	}
 
 	public double getLongitude(){
@@ -31,9 +31,9 @@ public class Location{
 	@Override
  	public String toString(){
 		return 
-			"Location{" +
-			",latitude = '" + latitude + '\'' + 
-			",longtitude = '" + longitude + '\'' +
+			"Location{" + 
+			"latitude = '" + latitude + '\'' + 
+			",longitude = '" + longitude + '\'' + 
 			"}";
 		}
 }

@@ -13,6 +13,8 @@ import android.widget.TextView;
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.BorrowListener;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.ScannerListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

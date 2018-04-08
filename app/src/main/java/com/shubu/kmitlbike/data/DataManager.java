@@ -14,6 +14,8 @@ import com.shubu.kmitlbike.data.model.Pokemon;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.model.bike.BikeBorrowRequest;
 import com.shubu.kmitlbike.data.model.bike.BikeBorrowResponse;
+import com.shubu.kmitlbike.data.model.bike.BikeReturnForm;
+import com.shubu.kmitlbike.data.model.bike.BikeReturnResponse;
 import com.shubu.kmitlbike.data.remote.Router;
 import com.shubu.kmitlbike.data.remote.Router.PokemonListResponse;
 import com.shubu.kmitlbike.data.state.BikeState;
@@ -80,8 +82,8 @@ public class DataManager {
         return mRouter.getBikeList();
     }
 
-    public Single<Response> performReturn(Bike bike, Location location){
-        return mRouter.returnBike(bike.getId(), LocationAdapter.makeLocationForm(location));
+    public Single<BikeReturnResponse> performReturn(Bike bike, Location location){
+        return mRouter.returnBike(bike.getId(), new BikeReturnForm(LocationAdapter.makeLocationForm(location), false));
     }
 
     public Bike getBikeFromScannerCode(Result code){

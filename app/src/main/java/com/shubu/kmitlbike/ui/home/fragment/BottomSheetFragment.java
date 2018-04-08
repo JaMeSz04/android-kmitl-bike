@@ -1,9 +1,7 @@
 package com.shubu.kmitlbike.ui.home.fragment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +9,10 @@ import android.widget.Button;
 
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.ScannerListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
-import timber.log.Timber;
 
 
 public class BottomSheetFragment extends BaseFragment {
