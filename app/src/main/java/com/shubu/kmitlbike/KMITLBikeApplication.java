@@ -5,6 +5,7 @@ import android.content.Context;
 
 import com.orhanobut.hawk.Hawk;
 import com.polidea.rxandroidble2.RxBleClient;
+import com.polidea.rxandroidble2.internal.RxBleLog;
 import com.shubu.kmitlbike.injection.component.ApplicationComponent;
 import com.shubu.kmitlbike.injection.component.BusComponent;
 import com.shubu.kmitlbike.injection.component.DaggerApplicationComponent;
@@ -27,6 +28,8 @@ public class KMITLBikeApplication extends Application  {
         Hawk.init(this.getApplicationContext()).build();
         eventBus = DaggerBusComponent.create();
         bluetooth = RxBleClient.create(this.getApplicationContext());
+        RxBleClient.setLogLevel(RxBleLog.DEBUG);
+        RxBleLog.setLogger((level,tag,msg) -> Timber.tag(tag).log(level,msg));
         //BluetoothComponent bluetooth = DaggerBluetoothComponent.builder().build();
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());

@@ -5,6 +5,8 @@ import android.location.Location;
 import com.annimon.stream.Stream;
 import com.google.zxing.Result;
 import com.polidea.rxandroidble2.RxBleClient;
+import com.polidea.rxandroidble2.RxBleConnection;
+import com.polidea.rxandroidble2.RxBleDevice;
 import com.polidea.rxandroidble2.scan.ScanResult;
 import com.polidea.rxandroidble2.scan.ScanSettings;
 import com.shubu.kmitlbike.KMITLBikeApplication;
@@ -24,8 +26,10 @@ import com.shubu.kmitlbike.data.remote.Router.PokemonListResponse;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -50,6 +54,7 @@ public class DataManager {
     private List<UsagePlan> usagePlans;
     private PublishSubject<BikeState> usageStatus;
     private Location currentLocation = null;
+    private List<Disposable> bluetoothTasks;
 
     @Inject
     public DataManager(Router router) {
@@ -223,8 +228,13 @@ public class DataManager {
 
 
     private void initiateBluetoothService(BikeBorrowResponse value){
+        this.bluetoothTasks = new ArrayList<>();
         usageStatus.onNext(BikeState.BORROW_SCAN_START);
-        Disposable scannerDisposable = this.searchLock(value.getMessage());
+        this.bluetoothTasks.add(this.searchLock(value.getMessage()));
+    }
+
+    private Observable<RxBleConnection> connectToDevice(RxBleDevice device){
+        return device.establishConnection(false);
     }
 
     private Disposable searchLock(String encryptedLock){
@@ -234,6 +244,7 @@ public class DataManager {
                 scanResult -> {
                     Timber.i(scanResult.toString());
                     usageStatus.onNext(BikeState.PAIRING);
+
                 },
                 throwable -> {
                     Timber.e(throwable);
@@ -241,6 +252,29 @@ public class DataManager {
         );
         return bluetoothScanSubscriber;
     }
+
+    private Disposable performConnection(Observable<RxBleConnection> connection){
+        return connection
+                .flatMapSingle(RxBleConnection::discoverServices)
+                .flatMapSingle(rxBleDeviceServices -> rxBleDeviceServices.getCharacteristic(UUID.fromString("FFE1")))
+                .doOnSubscribe( disposable -> { usageStatus.onNext(BikeState.BORROW_START);})
+                .subscribe(
+                    characteristic -> {
+
+                    }
+                );
+    }
+
+    private Disposable transmittCommand(Observable<RxBleConnection> connection, String cmd){
+        return connection
+                .firstOrError()
+                .flatMap(rxBleConnection -> rxBleConnection.writeCharacteristic(UUID.fromString("FFE1"), cmd.getBytes(StandardCharsets.UTF_8)) )
+                .subscribe( bytes -> {
+                    Timber.i("data to bluetooth : " + bytes.toString());
+                });
+    }
+
+
 
 
 
