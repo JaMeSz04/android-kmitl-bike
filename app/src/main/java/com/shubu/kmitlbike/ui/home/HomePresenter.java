@@ -17,19 +17,23 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Single;
+import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import retrofit2.Response;
-import rx.Single;
-import rx.SingleSubscriber;
+
+import io.reactivex.schedulers.Schedulers;
+
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 public class HomePresenter extends BasePresenter<HomeMVPView> {
 
     private final DataManager mDataManager;
-    private CompositeSubscription mSubscriptions;
+    private CompositeDisposable mSubscriptions;
+
 
 
     @Inject
@@ -39,10 +43,10 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
     @Override
     public void attachView(HomeMVPView mvpView) {
         super.attachView(mvpView);
-        mSubscriptions = new CompositeSubscription();
+        mSubscriptions = new CompositeDisposable();
     }
     public void onDestroy(){
-        mSubscriptions.unsubscribe();
+        mSubscriptions.dispose();
     }
 
 
@@ -50,36 +54,26 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
         mSubscriptions.add(mDataManager.getBikeList()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
-            .subscribe(new SingleSubscriber<List<Bike>>() {
-                @Override
-                public void onSuccess(List<Bike> value) {
+            .subscribe(listBike -> {
                     Timber.e("pass presenter");
-                    mDataManager.setBikeList(value);
-                    getMvpView().onBikeListUpdate(value);
-                }
-                @Override
-                public void onError(Throwable error) {
-                    Timber.i("error: " + error.toString());
-                }
-            }));
+                    mDataManager.setBikeList(listBike);
+                    getMvpView().onBikeListUpdate(listBike);
+                },
+                error -> Timber.i("error: " + error.toString())
+
+            ));
     }
 
     public void getUsagePlan(){
         mSubscriptions.add(mDataManager.getUsagePlan()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
-            .subscribe(new SingleSubscriber<List<UsagePlan>>() {
-                @Override
-                public void onSuccess(List<UsagePlan> value) {
-                    mDataManager.setUsagePlans(value);
-                    getMvpView().onUsagePlanUpdate(value);
-                }
-                @Override
-                public void onError(Throwable error) {
-
-                }
-            }))
-        ;
+            .subscribe(usagePlans ->  {
+                    mDataManager.setUsagePlans(usagePlans);
+                    getMvpView().onUsagePlanUpdate(usagePlans);
+                },
+                throwable -> {}
+            ));
     }
 
     public void onScanComplete(Result code){
@@ -118,18 +112,10 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
         mSubscriptions.add(mDataManager.performReturn(bike, location)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
-            .subscribe(new SingleSubscriber<BikeReturnResponse>() {
-                @Override
-                public void onSuccess(BikeReturnResponse value) {
-                    getMvpView().onReturnCompleted();
-                }
-
-                @Override
-                public void onError(Throwable error) {
-                    Timber.e(error);
-                }
-            }));
-
+            .subscribe(
+                bikeReturnResponse -> getMvpView().onReturnCompleted(),
+                throwable -> Timber.e(throwable)
+            ));
     }
 
     public void updateLocation(Location location){
@@ -137,20 +123,11 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
         if (response == null || location.equals(mDataManager.getCurrentLocation())){
             return; //hypothesis : case F | T is not possible
         }
-        response.observeOn(AndroidSchedulers.mainThread())
+        Disposable dResponse = response.observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(new SingleSubscriber<Object>() {
-
-            @Override
-            public void onSuccess(Object value) {
-                getMvpView().onLocationUpdate(location);
-            }
-
-            @Override
-            public void onError(Throwable error) {
-                Timber.e(error);
-            }
-        });
+                .subscribe(
+                    object -> getMvpView().onLocationUpdate(location),
+                    throwable -> Timber.e(throwable));
     }
 
 

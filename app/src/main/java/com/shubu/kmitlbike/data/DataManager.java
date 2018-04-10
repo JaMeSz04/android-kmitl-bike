@@ -15,7 +15,6 @@ import com.shubu.kmitlbike.data.adapter.LocationAdapter;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
-import com.shubu.kmitlbike.data.model.NamedResource;
 import com.shubu.kmitlbike.data.model.Pokemon;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.model.bike.BikeBorrowRequest;
@@ -23,7 +22,6 @@ import com.shubu.kmitlbike.data.model.bike.BikeBorrowResponse;
 import com.shubu.kmitlbike.data.model.bike.BikeReturnForm;
 import com.shubu.kmitlbike.data.model.bike.BikeReturnResponse;
 import com.shubu.kmitlbike.data.remote.Router;
-import com.shubu.kmitlbike.data.remote.Router.PokemonListResponse;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
 import com.shubu.kmitlbike.util.UUIDHelper;
@@ -31,20 +29,15 @@ import com.shubu.kmitlbike.util.UUIDHelper;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
-import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import rx.Single;
-import rx.SingleSubscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.Single;
 import rx.subjects.PublishSubject;
 import timber.log.Timber;
 
@@ -66,23 +59,7 @@ public class DataManager {
         mRouter = router;
     }
 
-    public Single<List<String>> getPokemonList(int limit) {
-        return mRouter.getPokemonList(limit)
-                .flatMap(new Func1<Router.PokemonListResponse,
-                        Single<? extends List<String>>>() {
-                            @Override
-                            public Single<? extends List<String>>
-                                    call(PokemonListResponse pokemonListResponse) {
-                                List<String> pokemonNames = new ArrayList<>();
-                                for (NamedResource pokemon : pokemonListResponse.results) {
-                                    pokemonNames.add(pokemon.name);
-                                }
-                                return Single.just(pokemonNames);
-                            }
-                        });
-    }
-
-    public Single<LoginResponse> login(String username, String password){
+    public Single<LoginResponse> login(String username, String password) {
         Timber.i("gonna login");
         return mRouter.login(new LoginForm(username, password));
 
@@ -90,21 +67,21 @@ public class DataManager {
 
     //BIKE MANAGER
 
-    public Single<List<UsagePlan>> getUsagePlan(){
+    public Single<List<UsagePlan>> getUsagePlan() {
         return mRouter.getUsagePlan();
     }
 
-    public Single<List<Bike>> getBikeList(){
+    public Single<List<Bike>> getBikeList() {
         return mRouter.getBikeList();
     }
 
-    public Single<BikeReturnResponse> performReturn(Bike bike, Location location){
+    public Single<BikeReturnResponse> performReturn(Bike bike, Location location) {
         return mRouter.returnBike(bike.getId(), new BikeReturnForm(LocationAdapter.makeLocationForm(location), false));
     }
 
-    public Bike getBikeFromScannerCode(Result code){
-        List<Bike> result = Stream.of(this.bikeList).filter( bike -> bike.getBarcode().equals(code.getText())).toList();
-        if (result.size() <= 0){ /* TODO: 4/2/2018 raise GUI error : case -> barcode not found!!! */  }
+    public Bike getBikeFromScannerCode(Result code) {
+        List<Bike> result = Stream.of(this.bikeList).filter(bike -> bike.getBarcode().equals(code.getText())).toList();
+        if (result.size() <= 0) { /* TODO: 4/2/2018 raise GUI error : case -> barcode not found!!! */ }
         return result.get(0);
     }
 
@@ -120,41 +97,38 @@ public class DataManager {
         this.usagePlans = usagePlans;
     }
 
-    public PublishSubject<BikeState> initializeBorrowService(Bike bike){
+    public PublishSubject<BikeState> initializeBorrowService(Bike bike) {
         this.usingBike = bike;
         this.usageStatus = PublishSubject.create();
         return this.usageStatus;
     }
 
-    public void performBorrow(Bike bike, Location location){
+    public void performBorrow(Bike bike, Location location) {
         usageStatus.onNext(BikeState.BORROW_START);
         BikeBorrowRequest request = new BikeBorrowRequest();
         request.setLocation(LocationAdapter.makeLocationForm(location));
         request.setNonce(Math.round(System.nanoTime() / 1000));
         request.setSelectedPlan(CONSTANTS.SELECTED_PLAN);
-        mRouter.borrowBike(bike.getId(), request)
+        Disposable borrow = mRouter.borrowBike(bike.getId(), request)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new SingleSubscriber<BikeBorrowResponse>() {
-            @Override
-            public void onSuccess(BikeBorrowResponse value) {
-                switch (bike.getBikeModel()){
-                    case CONSTANTS.GIANT_ESCAPE:
-                        // TODO: 4/3/2018 bluetooth service
-                        initiateBluetoothService(value);
-                        break;
-                    case CONSTANTS.LA_GREEN:
-                        usageStatus.onCompleted();
+                .subscribeOn(io.reactivex.schedulers.Schedulers.io())
+                .subscribe(bikeBorrowResponse  -> {
+                        switch (bike.getBikeModel()) {
+                            case CONSTANTS.GIANT_ESCAPE:
+                                // TODO: 4/3/2018 bluetooth service
+                                initiateBluetoothService(bikeBorrowResponse);
+                                break;
+                            case CONSTANTS.LA_GREEN:
+                                usageStatus.onCompleted();
 
-                }
-            }
+                        }
+                    },
 
-            @Override
-            public void onError(Throwable error) {
-                Timber.e("error woi : " + error.getMessage());
-                Timber.e(error);
-            }
-        });
+                     error -> {
+                        Timber.e("error woi : " + error.getMessage());
+                        Timber.e(error);
+                    }
+                );
     }
 
     public Bike getUsingBike() {
@@ -168,12 +142,12 @@ public class DataManager {
 
     //LOCATION MANAGER
 
-    public Location getCurrentLocation(){
+    public Location getCurrentLocation() {
         return this.currentLocation;
     }
 
-    public Single<Object> updateLocation(Location location){
-        if (this.isBetterLocation(location, this.currentLocation)){
+    public Single<Object> updateLocation(Location location) {
+        if (this.isBetterLocation(location, this.currentLocation)) {
             return mRouter.updateTrackingLocation(LocationAdapter.makeLocationForm(location));
         }
         return null;
@@ -232,7 +206,7 @@ public class DataManager {
     //BLUETOOTH MANAGER
 
 
-    private void initiateBluetoothService(BikeBorrowResponse value){
+    private void initiateBluetoothService(BikeBorrowResponse value) {
         this.bluetoothTasks = new ArrayList<>();
         usageStatus.onNext(BikeState.BORROW_SCAN_START);
         commandNotification = PublishSubject.create();
@@ -241,95 +215,27 @@ public class DataManager {
         this.bluetoothTasks.add(connectionTask);
     }
 
-
-
-
-
-    private Disposable searchLock(Bike bike, String encryptedLock){
+    private Disposable searchLock(Bike bike, String encryptedLock) {
         RxBleClient bluetooth = KMITLBikeApplication.getBluetooth();
-
         Disposable bluetoothScanSubscriber = bluetooth.scanBleDevices(new ScanSettings.Builder().build())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(io.reactivex.schedulers.Schedulers.io())
                 .timeout(15, TimeUnit.SECONDS)
-                .filter(scanResult -> scanResult.getBleDevice().getMacAddress().equals(bike.getMacAddress()))
+                .filter( scanResult -> scanResult.getBleDevice().getMacAddress().equals( bike.getMacAddress()) )
+                .flatMap( scanResult -> scanResult.getBleDevice().establishConnection(false) )
+                .flatMap( rxBleConnection -> {
+                    usageStatus.onNext(BikeState.BORROW_START);
+                    Observable<Observable<byte[]>> notification = rxBleConnection.setupNotification(UUIDHelper.uuidFromString("FFE1"));
+                    rxBleConnection.writeCharacteristic(UUIDHelper.uuidFromString("FFE1"), "BORROW".getBytes(StandardCharsets.UTF_8));
+                    return notification;
+                } )
+                .doOnNext( notificationObservable -> usageStatus.onNext(BikeState.PAIRING) )
+                .flatMap( notificationObservable -> notificationObservable )
                 .subscribe(
-                scanResult -> {
-                    Timber.i(scanResult.toString());
-                    usageStatus.onNext(BikeState.PAIRING);
-                    this.notificationHandler(scanResult.getBleDevice());
-                },
-                throwable -> {
-                    Timber.e(throwable);
-                }
-        );
+                        bytes -> Timber.tag("Bluetooth").wtf(bytes.toString())
+                );
+
         return bluetoothScanSubscriber;
     }
-
-    private Disposable notificationHandler(RxBleDevice device){
-        Observable<RxBleConnection> connection = device.establishConnection(false).subscribeOn(io.reactivex.schedulers.Schedulers.io()).share();
-        this.transmittCommand(connection, commandNotification);
-        return connection
-                .flatMap( rxBleConnection -> rxBleConnection.setupNotification(UUIDHelper.uuidFromString("FFE1")) )
-                .doOnNext( notificationObservable -> commandNotification.onNext("BORROW") )
-                .flatMap( notificationObservable -> notificationObservable)
-                .subscribe(
-                    bytes -> {
-                        Timber.e("hehe");
-                        Timber.i(bytes.toString());
-                        this.onCharacteristicHandler(bytes);
-                    },
-                    throwable -> Timber.e(throwable)
-                );
-    }
-
-    private void onCharacteristicHandler(byte[] data){
-        Timber.i("data from characteristic : " + data.toString());
-        String sData = data.toString();
-        switch(sData){
-            default : Timber.i("don't do shit");
-        }
-    }
-
-    private void transmittCommand(Observable<RxBleConnection> connection, PublishSubject<String> notification){
-        notification
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(
-                cmd -> {
-                    Timber.e("sheha;sdkfjas;dfk");
-                    Disposable thing = connection
-                        .firstOrError()
-                        .flatMap(rxBleConnection -> rxBleConnection.writeCharacteristic(UUIDHelper.uuidFromString("FFE1"), cmd.getBytes(StandardCharsets.UTF_8)) )
-                        .subscribe( bytes -> {
-                            Timber.i("data to bluetooth : " + bytes.toString());
-                        });
-                },
-                throwable -> {});
-    }
-
-
-    private Disposable performConnection(Observable<RxBleConnection> connection, String msg){
-        return connection
-                .flatMapSingle(RxBleConnection::discoverServices)
-                .flatMapSingle(rxBleDeviceServices -> rxBleDeviceServices.getCharacteristic(UUID.nameUUIDFromBytes("FFE1".getBytes(StandardCharsets.UTF_8))))
-                .doOnSubscribe( disposable -> { usageStatus.onNext(BikeState.BORROW_START);})
-                .subscribe(
-                    characteristic -> {
-                        Timber.i("incoming characteristic: " + characteristic.toString());
-                    }
-                );
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
