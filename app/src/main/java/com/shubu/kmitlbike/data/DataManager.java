@@ -59,6 +59,7 @@ public class DataManager {
     private PublishSubject<BikeState> usageStatus;
     private Location currentLocation = null;
     private List<Disposable> bluetoothTasks;
+    private PublishSubject<String> commandNotification;
 
     @Inject
     public DataManager(Router router) {
@@ -234,6 +235,7 @@ public class DataManager {
     private void initiateBluetoothService(BikeBorrowResponse value){
         this.bluetoothTasks = new ArrayList<>();
         usageStatus.onNext(BikeState.BORROW_SCAN_START);
+        commandNotification = PublishSubject.create();
         Timber.i(value.getMessage());
         Disposable connectionTask = this.searchLock(value.getSession().getBike(), value.getMessage());
         this.bluetoothTasks.add(connectionTask);
@@ -245,6 +247,7 @@ public class DataManager {
 
     private Disposable searchLock(Bike bike, String encryptedLock){
         RxBleClient bluetooth = KMITLBikeApplication.getBluetooth();
+
         Disposable bluetoothScanSubscriber = bluetooth.scanBleDevices(new ScanSettings.Builder().build())
                 .timeout(15, TimeUnit.SECONDS)
                 .filter(scanResult -> scanResult.getBleDevice().getMacAddress().equals(bike.getMacAddress()))
@@ -252,14 +255,11 @@ public class DataManager {
                 scanResult -> {
                     Timber.i(scanResult.toString());
                     usageStatus.onNext(BikeState.PAIRING);
-
                     Observable<RxBleConnection> connection = scanResult.getBleDevice().establishConnection(false).subscribeOn(io.reactivex.schedulers.Schedulers.io()).share();
                     connection
                             .flatMap( rxBleConnection -> rxBleConnection.setupNotification(UUIDHelper.uuidFromString("FFE1")) )
                             .doOnNext( notificationObservable ->  {
-                                byte[] data = "BORROW".getBytes("UTF-8");
-                                connection.flatMap(rxBleConnection -> rxBleConnection.writeCharacteristic(UUIDHelper.uuidFromString("FFE1"),data));
-
+                                commandNotification.onNext("BORROW");
                             }) // TODO: 4/10/18 add BORROW write command
                             .flatMap( notificationObservable -> notificationObservable)
                             .subscribe(
@@ -280,6 +280,23 @@ public class DataManager {
         return bluetoothScanSubscriber;
     }
 
+    private void transmittCommand(Observable<RxBleConnection> connection, PublishSubject<String> notification){
+        notification
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(
+                cmd -> {
+                    Timber.e("sheha;sdkfjas;dfk");
+                    Disposable thing = connection
+                        .firstOrError()
+                        .flatMap(rxBleConnection -> rxBleConnection.writeCharacteristic(UUIDHelper.uuidFromString("FFE1"), cmd.getBytes(StandardCharsets.UTF_8)) )
+                        .subscribe( bytes -> {
+                            Timber.i("data to bluetooth : " + bytes.toString());
+                        });
+                },
+                throwable -> {});
+    }
+
 
     private Disposable performConnection(Observable<RxBleConnection> connection, String msg){
         return connection
@@ -294,14 +311,7 @@ public class DataManager {
     }
 
 
-    private Disposable transmittCommand(Observable<RxBleConnection> connection, String cmd){
-        return connection
-                .firstOrError()
-                .flatMap(rxBleConnection -> rxBleConnection.writeCharacteristic(UUIDHelper.uuidFromString("FFE1"), cmd.getBytes(StandardCharsets.UTF_8)) )
-                .subscribe( bytes -> {
-                    Timber.i("data to bluetooth : " + bytes.toString());
-                });
-    }
+
 
 
 
