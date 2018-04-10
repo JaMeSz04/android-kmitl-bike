@@ -255,29 +255,38 @@ public class DataManager {
                 scanResult -> {
                     Timber.i(scanResult.toString());
                     usageStatus.onNext(BikeState.PAIRING);
-                    Observable<RxBleConnection> connection = scanResult.getBleDevice().establishConnection(false).subscribeOn(io.reactivex.schedulers.Schedulers.io()).share();
-                    connection
-                            .flatMap( rxBleConnection -> rxBleConnection.setupNotification(UUIDHelper.uuidFromString("FFE1")) )
-                            .doOnNext( notificationObservable ->  {
-                                commandNotification.onNext("BORROW");
-                            }) // TODO: 4/10/18 add BORROW write command
-                            .flatMap( notificationObservable -> notificationObservable)
-                            .subscribe(
-                                bytes -> {
-                                    Timber.e("hehe");
-                                    Timber.i(bytes.toString());
-                                },
-                                throwable -> Timber.e(throwable)
-                            );
-
-                    //Disposable notificationTask = this.performConnection(connection, encryptedLock);
-                    //Disposable transmittTask = this.transmittCommand(connection, "BORROW");
+                    this.notificationHandler(scanResult.getBleDevice());
                 },
                 throwable -> {
                     Timber.e(throwable);
                 }
         );
         return bluetoothScanSubscriber;
+    }
+
+    private Disposable notificationHandler(RxBleDevice device){
+        Observable<RxBleConnection> connection = device.establishConnection(false).subscribeOn(io.reactivex.schedulers.Schedulers.io()).share();
+        this.transmittCommand(connection, commandNotification);
+        return connection
+                .flatMap( rxBleConnection -> rxBleConnection.setupNotification(UUIDHelper.uuidFromString("FFE1")) )
+                .doOnNext( notificationObservable -> commandNotification.onNext("BORROW") )
+                .flatMap( notificationObservable -> notificationObservable)
+                .subscribe(
+                    bytes -> {
+                        Timber.e("hehe");
+                        Timber.i(bytes.toString());
+                        this.onCharacteristicHandler(bytes);
+                    },
+                    throwable -> Timber.e(throwable)
+                );
+    }
+
+    private void onCharacteristicHandler(byte[] data){
+        Timber.i("data from characteristic : " + data.toString());
+        String sData = data.toString();
+        switch(sData){
+            default : Timber.i("don't do shit");
+        }
     }
 
     private void transmittCommand(Observable<RxBleConnection> connection, PublishSubject<String> notification){
