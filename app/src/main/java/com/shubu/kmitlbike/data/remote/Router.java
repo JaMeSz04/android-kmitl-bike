@@ -15,22 +15,15 @@ import com.shubu.kmitlbike.data.model.bike.Location;
 
 import java.util.List;
 
-import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
-import retrofit2.http.Query;
 import io.reactivex.Single;
 
 public interface Router {
 
-    @GET("pokemon")
-    Single<PokemonListResponse> getPokemonList(@Query("limit") int limit);
-
-    @GET("pokemon/{name}")
-    Single<Pokemon> getPokemon(@Path("name") String name);
-
+    
     @POST("api/v1/accounts/login")
     Single<LoginResponse> login(@Body LoginForm form);
 
@@ -49,9 +42,5 @@ public interface Router {
     @POST("api/v1/bikes/update")
     Single<Object> updateTrackingLocation(@Body Location location);
 
-
-    class PokemonListResponse {
-        public List<NamedResource> results;
-    }
 
 }

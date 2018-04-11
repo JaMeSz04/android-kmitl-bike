@@ -85,9 +85,6 @@ public class DataManager {
         return result.get(0);
     }
 
-    public Single<Pokemon> getPokemon(String name) {
-        return mRouter.getPokemon(name);
-    }
 
     public void setBikeList(List<Bike> bikeList) {
         this.bikeList = bikeList;
