@@ -121,9 +121,8 @@ public class DataManager {
                         }
                     },
 
-                     error -> {
-                        Timber.e("error woi : " + error.getMessage());
-                        Timber.e(error);
+                     throwable -> {
+                        Timber.tag("on borrow : ").e(throwable);
                     }
                 );
     }
@@ -219,13 +218,12 @@ public class DataManager {
                 .subscribeOn(io.reactivex.schedulers.Schedulers.io())
                 .timeout(15, TimeUnit.SECONDS)
                 .filter( scanResult -> scanResult.getBleDevice().getMacAddress().equals( bike.getMacAddress()) )
-                .flatMap( scanResult -> scanResult.getBleDevice().establishConnection(false) )
-                .flatMap( rxBleConnection -> {
+                .flatMap( scanResult -> scanResult.getBleDevice().establishConnection(false).share() )
+                .doOnNext( rxBleConnection -> {
                     usageStatus.onNext(BikeState.BORROW_START);
-                    Observable<Observable<byte[]>> notification = rxBleConnection.setupNotification(UUIDHelper.uuidFromString("FFE1"));
                     rxBleConnection.writeCharacteristic(UUIDHelper.uuidFromString("FFE1"), "BORROW".getBytes(StandardCharsets.UTF_8));
-                    return notification;
-                } )
+                })
+                .flatMap( rxBleConnection -> rxBleConnection.setupNotification(UUIDHelper.uuidFromString("FFE1")))
                 .doOnNext( notificationObservable -> usageStatus.onNext(BikeState.PAIRING) )
                 .flatMap( notificationObservable -> notificationObservable )
                 .subscribe(
