@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.shubu.kmitlbike.R;
+import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
 import com.shubu.kmitlbike.ui.home.HomeActivity;
 
@@ -286,8 +287,10 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
     public void showSuccess(String response) {
         this.showProgress(false);
         Timber.i(response);
-        Intent intent = new Intent(this, HomeActivity.class);
-        startActivity(intent);
+//        Intent intent = new Intent(this, HomeActivity.class);
+//        Bundle userData = new Bundle();
+//
+//        startActivity(intent);
     }
 
     @Override

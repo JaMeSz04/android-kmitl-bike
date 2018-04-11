@@ -8,11 +8,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.BaseBottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.BorrowListener;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.ScannerListener;
 
@@ -21,15 +23,14 @@ import butterknife.ButterKnife;
 
 
 
-public class BikeInfoFragment extends BaseFragment {
+public class BikeInfoFragment extends BaseBottomSheetFragment {
 
     @BindView(R.id.BikeInfoTitle) TextView titleText;
     @BindView(R.id.BikeInfoSubTitle) TextView subtitleText;
     @BindView(R.id.BIkeInfoBikeName) TextView nameText;
     @BindView(R.id.BikeInfoLock) TextView lockText;
     @BindView(R.id.BikeInfoImage) ImageView bikeImage;
-    @BindView(R.id.BikeInfoScannerButton) ImageButton scanButton;
-    @BindView(R.id.BikeInfoBorrowButton) Button borrowButton;
+    @BindView(R.id.BikeInfoScannerButton) LinearLayout scanButton;
 
     private String bikeName = "";
     private String bikeModel = "";
@@ -38,6 +39,27 @@ public class BikeInfoFragment extends BaseFragment {
 
     public BikeInfoFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    protected void setRideOnClick() {
+        rideButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bListener.onToggle();
+            }
+        });
+    }
+
+    @Override
+    protected void setFooterButton() {
+        footerButton.setText("BORROW");
+        footerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBorrowListener.onBorrow();
+            }
+        });
     }
 
     // TODO: Rename and change types and number of parameters
@@ -82,7 +104,7 @@ public class BikeInfoFragment extends BaseFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_bike_info, container, false);
         ButterKnife.bind(this,view);
-
+        this.setRideOnClick();
         this.subtitleText.setText(this.bikeModel);
         this.nameText.setText(this.bikeName);
         this.lockText.setText(this.bikeModel.equals(CONSTANTS.GIANT_ESCAPE)? "InfiniLock" : "Manual Lock" );
@@ -93,12 +115,9 @@ public class BikeInfoFragment extends BaseFragment {
                 mListener.onScannerStart();
             }
         });
-        this.borrowButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mBorrowListener.onBorrow();
-            }
-        });
+        this.setFooterButton();
+
+
 
         return view;
     }

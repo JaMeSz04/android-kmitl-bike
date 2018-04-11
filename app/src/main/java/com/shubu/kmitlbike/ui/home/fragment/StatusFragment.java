@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.BaseBottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.StatusListener;
 
 import butterknife.BindView;
@@ -18,7 +19,7 @@ import butterknife.ButterKnife;
 import timber.log.Timber;
 
 
-public class StatusFragment extends BaseFragment {
+public class StatusFragment extends BaseBottomSheetFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String MAC_ADDRESS = "mac-address";
@@ -29,7 +30,6 @@ public class StatusFragment extends BaseFragment {
 
     @BindView(R.id.BikeStatusText) TextView statusText;
     @BindView(R.id.BikeStatusProgressBar) ProgressBar progressBar;
-    @BindView(R.id.BikeStatusConfirmButton) Button confirmButton;
 
     public StatusFragment() {
         // Required empty public constructor
@@ -54,19 +54,28 @@ public class StatusFragment extends BaseFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_status, container, false);
-        ButterKnife.bind(this, view);
-        this.confirmButton.setOnClickListener(new View.OnClickListener() {
+    protected void setRideOnClick() {
+        bListener.onToggle();
+    }
+
+    @Override
+    protected void setFooterButton() {
+        footerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mListener.onStatusBorrowCompleted();
             }
         });
-        this.confirmButton.setVisibility(View.INVISIBLE);
+    }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_status, container, false);
+        ButterKnife.bind(this, view);
+        setFooterButton();
+        footerButton.setVisibility(View.INVISIBLE);
         eventBus.getBikeState().subscribe( state -> {
             Timber.i("on new state : " + state.toString());
             this.statusText.setText(state.toString());
@@ -74,8 +83,7 @@ public class StatusFragment extends BaseFragment {
         eventBus.getBikePassword().subscribe( password -> {
             this.progressBar.setVisibility(View.INVISIBLE);
             this.statusText.setText("Your bike password : " + password);
-            this.confirmButton.setVisibility(View.VISIBLE);
-
+            footerButton.setVisibility(View.VISIBLE);
         });
 
         return view;

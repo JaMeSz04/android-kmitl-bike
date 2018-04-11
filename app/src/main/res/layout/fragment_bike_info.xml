@@ -1,24 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:orientation="vertical"
     android:layout_height="@dimen/bottom_sheet_height"
     tools:context=".ui.home.fragment.BikeInfoFragment">
 
+    <include layout="@layout/bottomsheet_toolbar"/>
+
     <!-- TODO: Update blank fragment layout -->
 
-    <Button
-        android:id="@+id/BikeInfoBorrowButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_margin="16dp"
-        android:text="BORROW" />
 
     <RelativeLayout
         android:id="@+id/BikeInfoContentView"
         android:layout_width="match_parent"
+        android:layout_marginTop="16dp"
         android:layout_height="wrap_content">
 
 
@@ -27,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginLeft="32dp"
-            android:layout_marginTop="48dp"
+
             android:orientation="vertical">
 
 
@@ -72,25 +69,52 @@
                 android:layout_height="wrap_content"
                 android:text="Infinilock" />
 
-            <ImageButton
+
+            <LinearLayout
                 android:id="@+id/BikeInfoScannerButton"
-                android:layout_marginTop="16dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_code_scanner_auto_focus_off" />
+                android:layout_marginTop="36dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/BikeInfoScannerIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_code_scanner_auto_focus_off" />
+
+                <TextView
+                    android:id="@+id/BikeInfoScannerText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:text="RESCAN"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
         </LinearLayout>
 
+
         <ImageView
             android:id="@+id/BikeInfoImage"
-            android:layout_width="271dp"
-            android:layout_height="463dp"
+            android:layout_width="218dp"
+            android:layout_height="match_parent"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:src="@drawable/la_green_cut" />
+
+        <include layout="@layout/bottomsheet_footer"/>
 
 
     </RelativeLayout>
 
 
-</FrameLayout>
+
+</LinearLayout>

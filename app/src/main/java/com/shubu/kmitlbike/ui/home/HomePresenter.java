@@ -49,6 +49,10 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
         mSubscriptions.dispose();
     }
 
+    public Bike getSession(){
+        return mDataManager.getUsingBike();
+    }
+
 
     public void getBikeList() {
         mSubscriptions.add(mDataManager.getBikeList()

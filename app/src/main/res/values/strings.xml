@@ -32,4 +32,50 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="map_json">
+    [
+        {
+        "featureType": "administrative.country",
+        "elementType": "all",
+        "stylers": [
+        {
+        "visibility": "off"
+        }
+        ]
+        },
+        {
+        "featureType": "administrative.province",
+        "elementType": "all",
+        "stylers": [
+        {
+        "visibility": "off"
+        }
+        ]
+        },
+        {
+        "featureType": "landscape.natural.landcover",
+        "elementType": "all",
+        "stylers": [
+        {
+        "color": "#32393b"
+        },
+        {
+        "gamma": 1.1
+        }
+        ]
+        },
+        {
+        "featureType": "water",
+        "elementType": "all",
+        "stylers": [
+        {
+        "color": "#4e6b75"
+        },
+        {
+        "gamma": 0.98
+        }
+        ]
+        }
+        ]
+    </string>
 </resources>
