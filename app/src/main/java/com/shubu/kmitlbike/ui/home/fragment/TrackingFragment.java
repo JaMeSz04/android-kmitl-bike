@@ -101,7 +101,9 @@ public class TrackingFragment extends BaseBottomSheetFragment {
         Timber.e("hehe");
         View view = inflater.inflate(R.layout.fragment_tracking, container, false);
         ButterKnife.bind(this, view);
-        this.bikeImage.setImageResource( this.bikeName == CONSTANTS.GIANT_ESCAPE? R.drawable.giant_escape : R.drawable.la_green);
+        this.setFooterButton();
+        this.setRideOnClick();
+        this.bikeImage.setImageResource( this.bikeName.equals(CONSTANTS.GIANT_ESCAPE)? R.drawable.giant_escape : R.drawable.la_green);
         this.timeRemainingText.setText(this.bikeDuration + TIMER_UNIT);
         this.finalTimeText.setText(this.getFinalDuration());
         this.initiateTimer();

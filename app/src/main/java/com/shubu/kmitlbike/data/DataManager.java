@@ -132,19 +132,19 @@ public class DataManager {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(io.reactivex.schedulers.Schedulers.io())
                 .subscribe(bikeBorrowResponse  -> {
-                            switch (bike.getBikeModel()) {
-                                case CONSTANTS.GIANT_ESCAPE:
-                                    bluetoothUtil.borrow(bikeBorrowResponse.getMessage());
-                                    break;
-                                case CONSTANTS.LA_GREEN:
-                                    usageStatus.onCompleted();
+                        switch (bike.getBikeModel()) {
+                            case CONSTANTS.GIANT_ESCAPE:
+                                bluetoothUtil.borrow(bikeBorrowResponse.getMessage());
 
-                            }
-                        },
-
-                        throwable -> {
-                            Timber.tag("on borrow : ").e(throwable);
+                                break;
+                            case CONSTANTS.LA_GREEN:
+                                usageStatus.onCompleted();
                         }
+                    },
+
+                    throwable -> {
+                        Timber.tag("on borrow : ").e(throwable);
+                    }
                 );
     }
 

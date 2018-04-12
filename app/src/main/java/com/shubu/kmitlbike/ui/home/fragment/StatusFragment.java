@@ -74,6 +74,7 @@ public class StatusFragment extends BaseBottomSheetFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_status, container, false);
         ButterKnife.bind(this, view);
+        setRideOnClick();
         setFooterButton();
         footerButton.setVisibility(View.INVISIBLE);
         eventBus.getBikeState().subscribe( state -> {

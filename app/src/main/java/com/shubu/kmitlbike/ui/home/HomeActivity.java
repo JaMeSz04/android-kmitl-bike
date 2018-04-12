@@ -252,6 +252,17 @@ public class HomeActivity extends BaseActivity implements
             case CONSTANTS.GIANT_ESCAPE:
                 eventBus.getBikeState().onCompleted();
                 sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+                FragmentManager manager =  getFragmentManager();
+                FragmentTransaction ft = manager.beginTransaction();
+                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+
+                trackingFragment = TrackingFragment.newInstance(presenter.getSession().getBikeModel(), 60);
+                ft.replace(bottomSheetLayout.getId(), trackingFragment).commit();
+
+                ft.remove(bikeStatusFragment);
+
+                this.startLocationUpdate();
                 //collapse bottomsheet
                 break;
             case CONSTANTS.LA_GREEN:

@@ -74,6 +74,7 @@ public class BluetoothUtil {
         tasks.add(borrowTask);
     }
 
+
     private Observable<ScanResult> startDiscover(){
         this.updateEvent(BikeState.BORROW_SCAN_START);
         return this.client.scanBleDevices(new ScanSettings.Builder().build())
@@ -123,6 +124,8 @@ public class BluetoothUtil {
         switch (command[0]){
             case "NONCE":
                 onceSubscriber.onSuccess(command[1]);
+            case "BORROW":
+                eventbus.onCompleted();
 
         }
 
