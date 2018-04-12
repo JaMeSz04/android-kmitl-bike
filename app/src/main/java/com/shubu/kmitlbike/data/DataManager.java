@@ -24,6 +24,7 @@ import com.shubu.kmitlbike.data.model.bike.BikeReturnResponse;
 import com.shubu.kmitlbike.data.remote.Router;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
+import com.shubu.kmitlbike.util.BluetoothUtil;
 import com.shubu.kmitlbike.util.UUIDHelper;
 
 import java.nio.charset.StandardCharsets;
@@ -35,6 +36,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
+import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.Single;
@@ -53,6 +55,7 @@ public class DataManager {
     private Location currentLocation = null;
     private List<Disposable> bluetoothTasks;
     private PublishSubject<String> commandNotification;
+    private String nonce = null;
 
     @Inject
     public DataManager(Router router) {
@@ -101,31 +104,51 @@ public class DataManager {
     }
 
     public void performBorrow(Bike bike, Location location) {
+
+        if (bike.getBikeModel().equals(CONSTANTS.GIANT_ESCAPE)) {
+            BluetoothUtil bluetoothUtil = new BluetoothUtil(bike);
+            bluetoothUtil.setEventbus(usageStatus);
+            Disposable shit = bluetoothUtil.getOnceSubscriber()
+                .subscribe( item -> {nonce = item; borrowRequest(bike,location, bluetoothUtil);}, throwable -> {});
+            bluetoothUtil.initBluetoothService();
+        } else {
+            borrowRequest(bike,location, null);
+        }
+
+    }
+
+    private void borrowRequest(Bike bike, Location location, BluetoothUtil bluetoothUtil){
         usageStatus.onNext(BikeState.BORROW_START);
         BikeBorrowRequest request = new BikeBorrowRequest();
         request.setLocation(LocationAdapter.makeLocationForm(location));
-        request.setNonce(Math.round(System.nanoTime() / 1000));
+
+        if (this.nonce == null)
+            request.setNonce(Math.round(System.nanoTime() / 1000));
+        else
+            request.setNonce(Integer.parseInt(this.nonce));
+        Timber.e(request.toString());
         request.setSelectedPlan(CONSTANTS.SELECTED_PLAN);
         Disposable borrow = mRouter.borrowBike(bike.getId(), request)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(io.reactivex.schedulers.Schedulers.io())
                 .subscribe(bikeBorrowResponse  -> {
-                        switch (bike.getBikeModel()) {
-                            case CONSTANTS.GIANT_ESCAPE:
-                                // TODO: 4/3/2018 bluetooth service
-                                initiateBluetoothService(bikeBorrowResponse);
-                                break;
-                            case CONSTANTS.LA_GREEN:
-                                usageStatus.onCompleted();
+                            switch (bike.getBikeModel()) {
+                                case CONSTANTS.GIANT_ESCAPE:
+                                    bluetoothUtil.borrow(bikeBorrowResponse.getMessage());
+                                    break;
+                                case CONSTANTS.LA_GREEN:
+                                    usageStatus.onCompleted();
 
+                            }
+                        },
+
+                        throwable -> {
+                            Timber.tag("on borrow : ").e(throwable);
                         }
-                    },
-
-                     throwable -> {
-                        Timber.tag("on borrow : ").e(throwable);
-                    }
                 );
     }
+
+
 
     public Bike getUsingBike() {
         return usingBike;
@@ -198,39 +221,6 @@ public class DataManager {
         return provider1.equals(provider2);
     }
 
-
     //BLUETOOTH MANAGER
-
-
-    private void initiateBluetoothService(BikeBorrowResponse value) {
-        this.bluetoothTasks = new ArrayList<>();
-        usageStatus.onNext(BikeState.BORROW_SCAN_START);
-        commandNotification = PublishSubject.create();
-        Timber.i(value.getMessage());
-        Disposable connectionTask = this.searchLock(value.getSession().getBike(), value.getMessage());
-        this.bluetoothTasks.add(connectionTask);
-    }
-
-    private Disposable searchLock(Bike bike, String encryptedLock) {
-        RxBleClient bluetooth = KMITLBikeApplication.getBluetooth();
-        Disposable bluetoothScanSubscriber = bluetooth.scanBleDevices(new ScanSettings.Builder().build())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(io.reactivex.schedulers.Schedulers.io())
-                .timeout(15, TimeUnit.SECONDS)
-                .filter( scanResult -> scanResult.getBleDevice().getMacAddress().equals( bike.getMacAddress()) )
-                .flatMap( scanResult -> scanResult.getBleDevice().establishConnection(false).share() )
-                .doOnNext( rxBleConnection -> {
-                    usageStatus.onNext(BikeState.BORROW_START);
-                    rxBleConnection.writeCharacteristic(UUIDHelper.uuidFromString("FFE1"), "BORROW".getBytes(StandardCharsets.UTF_8));
-                })
-                .flatMap( rxBleConnection -> rxBleConnection.setupNotification(UUIDHelper.uuidFromString("FFE1")))
-                .doOnNext( notificationObservable -> usageStatus.onNext(BikeState.PAIRING) )
-                .flatMap( notificationObservable -> notificationObservable )
-                .subscribe(
-                        bytes -> Timber.tag("Bluetooth").wtf(bytes.toString())
-                );
-
-        return bluetoothScanSubscriber;
-    }
 
 }
