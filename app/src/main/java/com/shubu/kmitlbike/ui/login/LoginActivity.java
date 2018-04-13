@@ -66,6 +66,7 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
         activityComponent().inject(this);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
+        presenter.validateToken();
         presenter.attachView(this);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -82,6 +83,8 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
                 return false;
             }
         });
+
+
 
         mEmailView.setText("57090016@kmitl.ac.th");
         mPasswordView.setText("EEI0S2wO");
