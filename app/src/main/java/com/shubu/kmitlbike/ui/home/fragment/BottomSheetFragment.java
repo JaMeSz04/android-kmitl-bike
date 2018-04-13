@@ -6,18 +6,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-
 import com.shubu.kmitlbike.R;
-import com.shubu.kmitlbike.ui.base.BaseFragment;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.BaseBottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.ScannerListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class BottomSheetFragment extends BaseFragment {
+public class BottomSheetFragment extends BaseBottomSheetFragment {
 
-    @BindView(R.id.InstructionScanButton) Button scanButton;
 
     private ScannerListener mListener;
 
@@ -29,10 +27,32 @@ public class BottomSheetFragment extends BaseFragment {
         // Required empty public constructor
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+    }
+
+    @Override
+    protected void setRideOnClick() {
+        rideButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bListener.onToggle();
+            }
+        });
+    }
+
+    @Override
+    protected void setFooterButton() {
+        footerButton.setText("GOT IT");
+        footerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onScannerStart();
+            }
+        });
     }
 
     @Override
@@ -41,24 +61,17 @@ public class BottomSheetFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_bottom_sheet, container, false);
         // Inflate the layout for this fragment
         ButterKnife.bind(this,view);
-        scanButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.onScannerStart();
-            }
-        });
+        this.setRideOnClick();
+        this.setFooterButton();
         return view;
     }
-
-
-
-
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof ScannerListener) {
             mListener = (ScannerListener) context;
+
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");

@@ -11,13 +11,18 @@ import android.support.v4.app.ActivityCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import com.annimon.stream.Stream;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -25,19 +30,29 @@ import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.DrawerListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import rx.Subscriber;
 import timber.log.Timber;
 
 public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
 
 
+    @BindView(R.id.hamburgerMenu)
+    ImageButton hamburgerMenu;
+
+
     private MapView mapView;
     private GoogleMap googleMap;
     private List<Bike> bikeList;
     private LatLng prevLocation;
+    private List<Marker> markers;
+    private DrawerListener mListener;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -50,9 +65,16 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof DrawerListener){
+            mListener = (DrawerListener) context;
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     private void initializeBikeService(){
@@ -76,6 +98,20 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
     }
 
     private void updateTrackingLocation(Location location){
+        if (markers != null){
+            Stream.of(markers).forEach( marker -> marker.remove() );
+            markers = null;
+        }
+
+        if (location == null)
+            return;
+        //updqate user location
+        Marker usermarker = googleMap.addMarker(new MarkerOptions()
+                .flat(true)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_my_location))
+                .anchor(0.5f,0.5f)
+                .position(new LatLng(location.getLatitude(), location.getLongitude())));
+        googleMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
 
         Polyline line = this.googleMap.addPolyline(
                 new PolylineOptions().add(
@@ -92,12 +128,11 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
 
         if (this.bikeList != null && googleMap != null) {
             googleMap.clear();
-            List<MarkerOptions> markers;
-            markers = Stream.of(this.bikeList).map(bike -> {
-                return new MarkerOptions().position(new LatLng(bike.getLatitude(), bike.getLongitude()));
+            List<MarkerOptions> markerOptions;
+            markerOptions = Stream.of(this.bikeList).map(bike -> {
+                return new MarkerOptions().position(new LatLng(bike.getLatitude(), bike.getLongitude())).title(bike.getBikeModel()).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bike_location));
             }).toList();
-
-            Stream.of(markers).forEach(marker -> googleMap.addMarker(marker));
+            markers = Stream.of(markerOptions).map( markerOptions1 -> googleMap.addMarker(markerOptions1)).toList();
         }
     }
 
@@ -111,6 +146,13 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
+        ButterKnife.bind(this, rootView);
+        hamburgerMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mListener.onOpenDrawer();
+            }
+        });
         this.mapView = (MapView) rootView.findViewById(R.id.mapView);
         this.mapView.onCreate(savedInstanceState);
         this.mapView.onResume();
@@ -130,8 +172,11 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
         try {
             googleMap = mMap;
             googleMap.setMyLocationEnabled(true);
+            googleMap.getUiSettings().setCompassEnabled(false);
             googleMap.getUiSettings().setMyLocationButtonEnabled(false);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CONSTANTS.KMITL_LOCATION, 17));
+            googleMap.getUiSettings().setZoomControlsEnabled(false);
+            googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getActivity() ,R.raw.map_style ));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CONSTANTS.KMITL_LOCATION, 18));
             this.updateBikeLocation();
         } catch ( SecurityException e){
             Timber.e(e);

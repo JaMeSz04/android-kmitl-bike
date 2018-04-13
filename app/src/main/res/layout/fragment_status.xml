@@ -4,17 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/bottom_sheet_height"
     tools:context=".ui.home.fragment.StatusFragment"
-    android:layout_gravity="center_vertical">
+    >
 
     <!-- TODO: Update blank fragment layout -->
-
-    <Button
-        android:id="@+id/BikeStatusConfirmButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="16dp"
-        android:text="Start" />
+    <include
+        layout="@layout/bottomsheet_toolbar"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,11 +18,10 @@
 
         <ProgressBar
             android:id="@+id/BikeStatusProgressBar"
-            style="?android:attr/progressBarStyle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
 
-            />
+            android:layout_height="wrap_content"
+            android:indeterminate="false" />
 
         <TextView
             android:id="@+id/BikeStatusText"
@@ -41,6 +34,8 @@
             android:textStyle="bold" />
 
     </LinearLayout>
+
+    <include layout="@layout/bottomsheet_footer"/>
 
 
 </RelativeLayout>

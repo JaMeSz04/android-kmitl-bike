@@ -1,15 +1,21 @@
 package com.shubu.kmitlbike.data;
 
+import android.bluetooth.BluetoothClass;
 import android.location.Location;
 
 import com.annimon.stream.Stream;
 import com.google.zxing.Result;
+import com.polidea.rxandroidble2.RxBleClient;
+import com.polidea.rxandroidble2.RxBleConnection;
+import com.polidea.rxandroidble2.RxBleDevice;
+import com.polidea.rxandroidble2.scan.ScanResult;
+import com.polidea.rxandroidble2.scan.ScanSettings;
 import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.data.adapter.LocationAdapter;
+import com.shubu.kmitlbike.data.model.Token;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
-import com.shubu.kmitlbike.data.model.NamedResource;
 import com.shubu.kmitlbike.data.model.Pokemon;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.model.bike.BikeBorrowRequest;
@@ -17,22 +23,24 @@ import com.shubu.kmitlbike.data.model.bike.BikeBorrowResponse;
 import com.shubu.kmitlbike.data.model.bike.BikeReturnForm;
 import com.shubu.kmitlbike.data.model.bike.BikeReturnResponse;
 import com.shubu.kmitlbike.data.remote.Router;
-import com.shubu.kmitlbike.data.remote.Router.PokemonListResponse;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
+import com.shubu.kmitlbike.util.BluetoothUtil;
+import com.shubu.kmitlbike.util.UUIDHelper;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import retrofit2.Response;
-import rx.Single;
-import rx.SingleSubscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observable;
+import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.Single;
 import rx.subjects.PublishSubject;
 import timber.log.Timber;
 
@@ -43,58 +51,49 @@ public class DataManager {
     private final Router mRouter;
     private List<Bike> bikeList;
     private Bike usingBike;
+    private LoginResponse currentUser;
     private List<UsagePlan> usagePlans;
     private PublishSubject<BikeState> usageStatus;
     private Location currentLocation = null;
+    private List<Disposable> bluetoothTasks;
+    private PublishSubject<String> commandNotification;
+    private String nonce = null;
 
     @Inject
     public DataManager(Router router) {
         mRouter = router;
     }
 
-    public Single<List<String>> getPokemonList(int limit) {
-        return mRouter.getPokemonList(limit)
-                .flatMap(new Func1<Router.PokemonListResponse,
-                        Single<? extends List<String>>>() {
-                            @Override
-                            public Single<? extends List<String>>
-                                    call(PokemonListResponse pokemonListResponse) {
-                                List<String> pokemonNames = new ArrayList<>();
-                                for (NamedResource pokemon : pokemonListResponse.results) {
-                                    pokemonNames.add(pokemon.name);
-                                }
-                                return Single.just(pokemonNames);
-                            }
-                        });
-    }
-
-    public Single<LoginResponse> login(String username, String password){
+    public Single<LoginResponse> login(String username, String password) {
         Timber.i("gonna login");
         return mRouter.login(new LoginForm(username, password));
 
     }
 
-    public Single<List<UsagePlan>> getUsagePlan(){
+    public Single<LoginResponse> validateToken(String token){
+        return mRouter.tokenLogin( new Token(token) );
+    }
+
+    //BIKE MANAGER
+
+    public Single<List<UsagePlan>> getUsagePlan() {
         return mRouter.getUsagePlan();
     }
 
-    public Single<List<Bike>> getBikeList(){
+    public Single<List<Bike>> getBikeList() {
         return mRouter.getBikeList();
     }
 
-    public Single<BikeReturnResponse> performReturn(Bike bike, Location location){
+    public Single<BikeReturnResponse> performReturn(Bike bike, Location location) {
         return mRouter.returnBike(bike.getId(), new BikeReturnForm(LocationAdapter.makeLocationForm(location), false));
     }
 
-    public Bike getBikeFromScannerCode(Result code){
-        List<Bike> result = Stream.of(this.bikeList).filter( bike -> bike.getBarcode().equals(code.getText())).toList();
-        if (result.size() <= 0){ /* TODO: 4/2/2018 raise GUI error : case -> barcode not found!!! */  }
+    public Bike getBikeFromScannerCode(Result code) {
+        List<Bike> result = Stream.of(this.bikeList).filter(bike -> bike.getBarcode().equals(code.getText())).toList();
+        if (result.size() <= 0) { /* TODO: 4/2/2018 raise GUI error : case -> barcode not found!!! */ }
         return result.get(0);
     }
 
-    public Single<Pokemon> getPokemon(String name) {
-        return mRouter.getPokemon(name);
-    }
 
     public void setBikeList(List<Bike> bikeList) {
         this.bikeList = bikeList;
@@ -104,41 +103,66 @@ public class DataManager {
         this.usagePlans = usagePlans;
     }
 
-    public PublishSubject<BikeState> initializeBorrowService(Bike bike){
+    public PublishSubject<BikeState> initializeBorrowService(Bike bike) {
         this.usingBike = bike;
         this.usageStatus = PublishSubject.create();
         return this.usageStatus;
     }
 
-    public void performBorrow(Bike bike, Location location){
+    public LoginResponse getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(LoginResponse currentUser) {
+        this.currentUser = currentUser;
+    }
+
+    public void performBorrow(Bike bike, Location location) {
+
+        if (bike.getBikeModel().equals(CONSTANTS.GIANT_ESCAPE)) {
+            BluetoothUtil bluetoothUtil = new BluetoothUtil(bike);
+            bluetoothUtil.setEventbus(usageStatus);
+            Disposable shit = bluetoothUtil.getOnceSubscriber()
+                .subscribe( item -> {nonce = item; borrowRequest(bike,location, bluetoothUtil);}, throwable -> {});
+            bluetoothUtil.initBluetoothService();
+        } else {
+            borrowRequest(bike,location, null);
+        }
+
+    }
+
+    private void borrowRequest(Bike bike, Location location, BluetoothUtil bluetoothUtil){
         usageStatus.onNext(BikeState.BORROW_START);
         BikeBorrowRequest request = new BikeBorrowRequest();
         request.setLocation(LocationAdapter.makeLocationForm(location));
-        request.setNonce(Math.round(System.nanoTime() / 1000));
+
+        if (this.nonce == null)
+            request.setNonce(Math.round(System.nanoTime() / 1000));
+        else
+            request.setNonce(Integer.parseInt(this.nonce));
+        Timber.e(request.toString());
         request.setSelectedPlan(CONSTANTS.SELECTED_PLAN);
-        mRouter.borrowBike(bike.getId(), request)
+        Disposable borrow = mRouter.borrowBike(bike.getId(), request)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new SingleSubscriber<BikeBorrowResponse>() {
-            @Override
-            public void onSuccess(BikeBorrowResponse value) {
-                switch (bike.getBikeModel()){
-                    case CONSTANTS.GIANT_ESCAPE:
-                        // TODO: 4/3/2018 bluetooth service
-                        break;
-                    case CONSTANTS.LA_GREEN:
-                        usageStatus.onCompleted();
+                .subscribeOn(io.reactivex.schedulers.Schedulers.io())
+                .subscribe(bikeBorrowResponse  -> {
+                        switch (bike.getBikeModel()) {
+                            case CONSTANTS.GIANT_ESCAPE:
+                                bluetoothUtil.borrow(bikeBorrowResponse.getMessage());
 
-                }
-            }
+                                break;
+                            case CONSTANTS.LA_GREEN:
+                                usageStatus.onCompleted();
+                        }
+                    },
 
-            @Override
-            public void onError(Throwable error) {
-                Timber.e("error woi : " + error.getMessage());
-                Timber.e(error);
-            }
-        });
+                    throwable -> {
+                        Timber.tag("on borrow : ").e(throwable);
+                    }
+                );
     }
+
+
 
     public Bike getUsingBike() {
         return usingBike;
@@ -148,12 +172,15 @@ public class DataManager {
         this.usingBike = usingBike;
     }
 
-    public Location getCurrentLocation(){
+
+    //LOCATION MANAGER
+
+    public Location getCurrentLocation() {
         return this.currentLocation;
     }
 
-    public Single<Object> updateLocation(Location location){
-        if (this.isBetterLocation(location, this.currentLocation)){
+    public Single<Object> updateLocation(Location location) {
+        if (this.isBetterLocation(location, this.currentLocation)) {
             return mRouter.updateTrackingLocation(LocationAdapter.makeLocationForm(location));
         }
         return null;
@@ -207,4 +234,7 @@ public class DataManager {
         }
         return provider1.equals(provider2);
     }
+
+    //BLUETOOTH MANAGER
+
 }

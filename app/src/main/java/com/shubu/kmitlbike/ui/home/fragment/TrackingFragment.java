@@ -7,10 +7,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
+import com.shubu.kmitlbike.ui.common.CONSTANTS;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.BaseBottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.ReturnListener;
 
 import java.text.SimpleDateFormat;
@@ -22,7 +25,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class TrackingFragment extends BaseFragment {
+public class TrackingFragment extends BaseBottomSheetFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String BIKE_NAME = "bike-name";
@@ -37,9 +40,9 @@ public class TrackingFragment extends BaseFragment {
     private ReturnListener returnListener;
     private CountDownTimer timer;
 
-    @BindView(R.id.TrackingReturnButton) Button returnButton;
     @BindView(R.id.TrackingTimerText) TextView timeRemainingText;
     @BindView(R.id.TrackingFinalTimeText) TextView finalTimeText;
+    @BindView(R.id.TrackingBikeImage) ImageView bikeImage;
 
 
     public TrackingFragment() { }
@@ -76,21 +79,35 @@ public class TrackingFragment extends BaseFragment {
     }
 
     @Override
+    protected void setRideOnClick() {
+        bListener.onToggle();
+    }
+
+    @Override
+    protected void setFooterButton() {
+        footerButton.setText("RETURN");
+        footerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                returnListener.onReturn();
+            }
+        });
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         Timber.e("hehe");
         View view = inflater.inflate(R.layout.fragment_tracking, container, false);
         ButterKnife.bind(this, view);
+        this.setFooterButton();
+        this.setRideOnClick();
+        this.bikeImage.setImageResource( this.bikeName.equals(CONSTANTS.GIANT_ESCAPE)? R.drawable.giant_escape : R.drawable.la_green);
         this.timeRemainingText.setText(this.bikeDuration + TIMER_UNIT);
-        this.finalTimeText.setText(this.FINAL_TIME_TEXT + this.getFinalDuration());
+        this.finalTimeText.setText(this.getFinalDuration());
         this.initiateTimer();
-        this.returnButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                returnListener.onReturn();
-            }
-        });
+
 
         return view;
     }

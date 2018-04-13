@@ -4,15 +4,18 @@ import android.Manifest;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
-import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -29,17 +32,19 @@ import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
-import com.shubu.kmitlbike.ui.base.BaseFragment;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
 import com.shubu.kmitlbike.ui.home.fragment.BikeInfoFragment;
 import com.shubu.kmitlbike.ui.home.fragment.TrackingFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.BorrowListener;
 import com.shubu.kmitlbike.ui.home.fragment.BottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.ScannerFragment;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.BottomSheetListener;
+import com.shubu.kmitlbike.ui.home.fragment.interfaces.DrawerListener;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.ReturnListener;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.ScannerListener;
 import com.shubu.kmitlbike.ui.home.fragment.StatusFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.StatusListener;
+import com.shubu.kmitlbike.ui.profile.ProfileActivity;
 import com.shubu.kmitlbike.util.HomeBottomSheetBehavior;
 import com.shubu.kmitlbike.ui.home.fragment.HomeFragment;
 
@@ -49,7 +54,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import rx.Subscriber;
 import timber.log.Timber;
 
@@ -58,7 +62,9 @@ public class HomeActivity extends BaseActivity implements
         ScannerListener,
         BorrowListener,
         StatusListener,
-        ReturnListener {
+        BottomSheetListener,
+        ReturnListener,
+        DrawerListener {
 
     @Inject
     HomePresenter presenter;
@@ -71,8 +77,11 @@ public class HomeActivity extends BaseActivity implements
     FrameLayout scanner;
     @BindView(R.id.sheet_content_layout)
     FrameLayout bottomSheetLayout;
-    @BindView(R.id.HomeRideButton)
-    FloatingActionButton fab;
+    @BindView(R.id.navigationDrawer)
+    DrawerLayout navigationDrawer;
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
+
 
     private Fragment scannerFragment;
     private Fragment bikeInfoFragment;
@@ -95,10 +104,37 @@ public class HomeActivity extends BaseActivity implements
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         client = LocationServices.getFusedLocationProviderClient(this);
         this.initializeServicesFacade();
+        this.initializeNavigationDrawer();
 
         if (savedInstanceState == null)
             this.constructFragment();
 
+    }
+
+    private void initializeNavigationDrawer() {
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem item) {
+                        navigationDrawer.closeDrawers();
+                        instantiateActivity(item.getTitle().toString());
+                        return true;
+                    }
+                }
+        );
+    }
+
+    private void instantiateActivity(String choices){
+        Intent intent = null;
+        Timber.i(choices);
+        switch (choices){
+            case "Profile":
+                intent = new Intent(this, ProfileActivity.class);
+                break;
+        }
+
+        if (intent != null)
+            startActivity(intent);
     }
 
     private void initializeServicesFacade() {
@@ -140,7 +176,7 @@ public class HomeActivity extends BaseActivity implements
 
                     @Override
                     public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                        fab.animate().scaleX(1 - slideOffset).scaleY(1 - slideOffset).setDuration(0).start();
+                        //fab.animate().scaleX(1 - slideOffset).scaleY(1 - slideOffset).setDuration(0).start();
                     }
                 }
         );
@@ -162,7 +198,6 @@ public class HomeActivity extends BaseActivity implements
     }
 
 
-    @OnClick(R.id.HomeRideButton)
     public void toggleBottomSheet(){
         if (sheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
             sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -170,6 +205,11 @@ public class HomeActivity extends BaseActivity implements
             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
     }
+    @Override
+    public void onToggle() {
+        toggleBottomSheet();
+    }
+
 
     @Override
     public void onScannerStart() {
@@ -243,6 +283,17 @@ public class HomeActivity extends BaseActivity implements
             case CONSTANTS.GIANT_ESCAPE:
                 eventBus.getBikeState().onCompleted();
                 sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+                FragmentManager manager =  getFragmentManager();
+                FragmentTransaction ft = manager.beginTransaction();
+                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+
+                trackingFragment = TrackingFragment.newInstance(presenter.getSession().getBikeModel(), 60);
+                ft.replace(bottomSheetLayout.getId(), trackingFragment).commit();
+
+                ft.remove(bikeStatusFragment);
+
+                this.startLocationUpdate();
                 //collapse bottomsheet
                 break;
             case CONSTANTS.LA_GREEN:
@@ -256,10 +307,11 @@ public class HomeActivity extends BaseActivity implements
         FragmentManager manager =  getFragmentManager();
         FragmentTransaction ft = manager.beginTransaction();
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        ft.hide(bikeStatusFragment);
-        trackingFragment = TrackingFragment.newInstance("", 60);
+
+        trackingFragment = TrackingFragment.newInstance(presenter.getSession().getBikeModel(), 60);
         ft.replace(bottomSheetLayout.getId(), trackingFragment).commit();
         sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        ft.remove(bikeStatusFragment);
         // TODO: 4/5/2018  start tracking
         this.startLocationUpdate();
     }
@@ -314,6 +366,11 @@ public class HomeActivity extends BaseActivity implements
         } catch (SecurityException e){
             Timber.e(e);
         }
+    }
+
+    @Override
+    public void onOpenDrawer() {
+        navigationDrawer.openDrawer(Gravity.LEFT);
     }
 
 

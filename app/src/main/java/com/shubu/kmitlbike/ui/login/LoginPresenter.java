@@ -4,19 +4,16 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.orhanobut.hawk.Hawk;
-import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.data.DataManager;
-import com.shubu.kmitlbike.data.model.LoginResponse;
-import com.shubu.kmitlbike.injection.ApplicationContext;
 import com.shubu.kmitlbike.injection.ConfigPersistent;
 import com.shubu.kmitlbike.ui.base.BasePresenter;
 
 import javax.inject.Inject;
 
-import rx.SingleSubscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -28,7 +25,7 @@ import timber.log.Timber;
 public class LoginPresenter extends BasePresenter<LoginMVPView> {
 
     private final DataManager mDataManager;
-    private CompositeSubscription mSubscriptions;
+    private CompositeDisposable mSubscriptions;
 
     @Inject
     public LoginPresenter(DataManager dataManager) {
@@ -38,13 +35,13 @@ public class LoginPresenter extends BasePresenter<LoginMVPView> {
     @Override
     public void attachView(LoginMVPView mvpView) {
         super.attachView(mvpView);
-        mSubscriptions = new CompositeSubscription();
+        mSubscriptions = new CompositeDisposable();
     }
 
     @Override
     public void detachView() {
         super.detachView();
-        mSubscriptions.unsubscribe();
+        mSubscriptions.dispose();
         mSubscriptions = null;
     }
 
@@ -52,27 +49,29 @@ public class LoginPresenter extends BasePresenter<LoginMVPView> {
         checkViewAttached();
         mSubscriptions.add(mDataManager.login(username, password)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new SingleSubscriber<LoginResponse>(){
+                .subscribeOn(io.reactivex.schedulers.Schedulers.io())
+                .subscribe(
+                        loginResponse -> {
+                            Hawk.put("token", loginResponse.getToken());
+                            mDataManager.setCurrentUser(loginResponse);
+                            getMvpView().showSuccess(loginResponse.toString());
+                            getMvpView().redirect("main");
+                        },
 
-                    @Override
-                    public void onSuccess(LoginResponse value) {
-                        // TODO: 3/31/18 : move sharepref token to datamanager
-                        Hawk.put("token", value.getToken());
-                        getMvpView().showSuccess(value.toString());
-                        getMvpView().redirect("main");
-                    }
-
-                    @Override
-                    public void onError(Throwable error) {
-                        getMvpView().showError(error.toString());
-                    }
-                }));
+                        throwable -> getMvpView().showError(throwable.toString())
+                ));
     }
 
-    public boolean validateToken(){
-        return !Hawk.get("token","").isEmpty();
-
+    public void validateToken(){
+        if (Hawk.get("token","").isEmpty())
+            return;
+        Disposable validateTask = mDataManager.validateToken(Hawk.get("token", "")).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
+            .subscribe( loginResponse -> {
+                mDataManager.setCurrentUser(loginResponse);
+                getMvpView().redirect("main");
+            }, throwable -> {
+                Timber.e("token expired");
+            });
     }
 
 }

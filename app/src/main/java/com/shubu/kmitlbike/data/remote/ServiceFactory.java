@@ -5,6 +5,7 @@ import android.content.Context;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.shubu.kmitlbike.BuildConfig;
 import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.injection.ApplicationContext;
@@ -29,7 +30,7 @@ import timber.log.Timber;
 public class ServiceFactory {
 
     public static Router createClient() {
-        OkHttpClient okHttpClient = makeOkHttpClient(makeLoggingInterceptor());
+        OkHttpClient okHttpClient = makeOkHttpClient();
         return createService(okHttpClient, makeGson());
     }
 
@@ -39,15 +40,15 @@ public class ServiceFactory {
                 .baseUrl(BuildConfig.BASE_URL)
                 .client(okHttpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
         return retrofit.create(Router.class);
     }
 
-    public static OkHttpClient makeOkHttpClient(HttpLoggingInterceptor httpLoggingInterceptor) {
+    public static OkHttpClient makeOkHttpClient() {
         return new OkHttpClient.Builder()
                 .addInterceptor(new AuthIntercepter())
-                .addInterceptor(httpLoggingInterceptor)
+                //.addInterceptor(httpLoggingInterceptor)
                 .addInterceptor(new ResponseIntercepter())
                 .build();
     }
