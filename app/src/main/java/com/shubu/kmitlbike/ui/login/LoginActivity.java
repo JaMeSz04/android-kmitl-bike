@@ -86,8 +86,6 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
         mEmailView.setText("57090016@kmitl.ac.th");
         mPasswordView.setText("EEI0S2wO");
 
-        //validate token
-        this.validateToken();
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
@@ -99,6 +97,12 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        presenter.detachView();
     }
 
     private void populateAutoComplete() {
@@ -298,11 +302,6 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
         Timber.i(error);
     }
 
-    @Override
-    public void validateToken() {
-        if (presenter.validateToken())
-            this.redirect("main");
-    }
 
     @Override
     public void redirect(String where) {

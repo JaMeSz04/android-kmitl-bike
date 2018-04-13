@@ -12,6 +12,8 @@ import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -51,6 +53,7 @@ public class LoginPresenter extends BasePresenter<LoginMVPView> {
                 .subscribe(
                         loginResponse -> {
                             Hawk.put("token", loginResponse.getToken());
+                            mDataManager.setCurrentUser(loginResponse);
                             getMvpView().showSuccess(loginResponse.toString());
                             getMvpView().redirect("main");
                         },
@@ -59,9 +62,16 @@ public class LoginPresenter extends BasePresenter<LoginMVPView> {
                 ));
     }
 
-    public boolean validateToken(){
-        return !Hawk.get("token","").isEmpty();
-
+    public void validateToken(){
+        if (Hawk.get("token","").isEmpty())
+            return;
+        Disposable validateTask = mDataManager.validateToken(Hawk.get("token", "")).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
+            .subscribe( loginResponse -> {
+                mDataManager.setCurrentUser(loginResponse);
+                getMvpView().redirect("main");
+            }, throwable -> {
+                Timber.e("token expired");
+            });
     }
 
 }

@@ -1,6 +1,7 @@
 package com.shubu.kmitlbike.data.remote;
 
 
+import com.shubu.kmitlbike.data.model.Token;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
@@ -26,6 +27,9 @@ public interface Router {
     
     @POST("api/v1/accounts/login")
     Single<LoginResponse> login(@Body LoginForm form);
+
+    @POST("api/v1/accounts/access_token")
+    Single<LoginResponse> tokenLogin(@Body Token token);
 
     @GET("api/v1/bikes/list")
     Single<List<Bike>> getBikeList();

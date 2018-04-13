@@ -13,6 +13,5 @@ public interface LoginMVPView extends MvpView {
     void login(String email, String password);
     void showSuccess(String msg);
     void showError(String error);
-    void validateToken();
     void redirect(String where);
 }

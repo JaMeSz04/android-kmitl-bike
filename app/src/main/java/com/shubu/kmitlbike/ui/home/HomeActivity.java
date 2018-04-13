@@ -4,16 +4,18 @@ import android.Manifest;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -42,6 +44,7 @@ import com.shubu.kmitlbike.ui.home.fragment.interfaces.ReturnListener;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.ScannerListener;
 import com.shubu.kmitlbike.ui.home.fragment.StatusFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.StatusListener;
+import com.shubu.kmitlbike.ui.profile.ProfileActivity;
 import com.shubu.kmitlbike.util.HomeBottomSheetBehavior;
 import com.shubu.kmitlbike.ui.home.fragment.HomeFragment;
 
@@ -51,7 +54,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import rx.Subscriber;
 import timber.log.Timber;
 
@@ -77,6 +79,8 @@ public class HomeActivity extends BaseActivity implements
     FrameLayout bottomSheetLayout;
     @BindView(R.id.navigationDrawer)
     DrawerLayout navigationDrawer;
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
 
 
     private Fragment scannerFragment;
@@ -100,10 +104,37 @@ public class HomeActivity extends BaseActivity implements
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         client = LocationServices.getFusedLocationProviderClient(this);
         this.initializeServicesFacade();
+        this.initializeNavigationDrawer();
 
         if (savedInstanceState == null)
             this.constructFragment();
 
+    }
+
+    private void initializeNavigationDrawer() {
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem item) {
+                        navigationDrawer.closeDrawers();
+                        instantiateActivity(item.getTitle().toString());
+                        return true;
+                    }
+                }
+        );
+    }
+
+    private void instantiateActivity(String choices){
+        Intent intent = null;
+        Timber.i(choices);
+        switch (choices){
+            case "Profile":
+                intent = new Intent(this, ProfileActivity.class);
+                break;
+        }
+
+        if (intent != null)
+            startActivity(intent);
     }
 
     private void initializeServicesFacade() {

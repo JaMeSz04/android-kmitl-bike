@@ -12,6 +12,7 @@ import com.polidea.rxandroidble2.scan.ScanResult;
 import com.polidea.rxandroidble2.scan.ScanSettings;
 import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.data.adapter.LocationAdapter;
+import com.shubu.kmitlbike.data.model.Token;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
@@ -50,6 +51,7 @@ public class DataManager {
     private final Router mRouter;
     private List<Bike> bikeList;
     private Bike usingBike;
+    private LoginResponse currentUser;
     private List<UsagePlan> usagePlans;
     private PublishSubject<BikeState> usageStatus;
     private Location currentLocation = null;
@@ -66,6 +68,10 @@ public class DataManager {
         Timber.i("gonna login");
         return mRouter.login(new LoginForm(username, password));
 
+    }
+
+    public Single<LoginResponse> validateToken(String token){
+        return mRouter.tokenLogin( new Token(token) );
     }
 
     //BIKE MANAGER
@@ -101,6 +107,14 @@ public class DataManager {
         this.usingBike = bike;
         this.usageStatus = PublishSubject.create();
         return this.usageStatus;
+    }
+
+    public LoginResponse getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(LoginResponse currentUser) {
+        this.currentUser = currentUser;
     }
 
     public void performBorrow(Bike bike, Location location) {

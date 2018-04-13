@@ -3,7 +3,7 @@ apply from: '../config/quality/quality.gradle'
 
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 24
     buildToolsVersion '27.0.3'
 
     defaultConfig {
@@ -16,7 +16,7 @@ android {
         versionName '1.0.0'
 
         buildConfigField("String", "BASE_URL",
-                "\"http://161.246.94.246:1995/\"")
+                "\"http://ec2-54-255-207-48.ap-southeast-1.compute.amazonaws.com:8888/\"")
     }
     buildTypes {
         release {
@@ -48,7 +48,7 @@ android {
 }
 
 dependencies {
-    final SUPPORT_LIBRARY_VERSION = '23.4.0'
+    final SUPPORT_LIBRARY_VERSION = '24.2.0'
     final RETROFIT_VERSION = '2.0.2'
     final OKHTTP_VERSION = '3.4.1'
     final DAGGER_VERSION = '2.5'
