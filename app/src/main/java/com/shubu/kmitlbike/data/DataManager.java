@@ -2,6 +2,7 @@ package com.shubu.kmitlbike.data;
 
 import android.bluetooth.BluetoothClass;
 import android.location.Location;
+import android.provider.ContactsContract;
 
 import com.annimon.stream.Stream;
 import com.google.zxing.Result;
@@ -12,6 +13,8 @@ import com.polidea.rxandroidble2.scan.ScanResult;
 import com.polidea.rxandroidble2.scan.ScanSettings;
 import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.data.adapter.LocationAdapter;
+import com.shubu.kmitlbike.data.model.History;
+import com.shubu.kmitlbike.data.model.ProfileHistory;
 import com.shubu.kmitlbike.data.model.Token;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
@@ -41,6 +44,7 @@ import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import timber.log.Timber;
 
@@ -88,6 +92,13 @@ public class DataManager {
         return mRouter.returnBike(bike.getId(), new BikeReturnForm(LocationAdapter.makeLocationForm(location), false));
     }
 
+    public Single<List<ProfileHistory>> getHistoryList(){
+        return mRouter.getHistoriesList(this.currentUser.getId());
+    }
+    public Single<History> getFullHistory(ProfileHistory history){
+        return mRouter.getHistory(this.currentUser.getId(), history.getId());
+    }
+
     public Bike getBikeFromScannerCode(Result code) {
         List<Bike> result = Stream.of(this.bikeList).filter(bike -> bike.getBarcode().equals(code.getText())).toList();
         if (result.size() <= 0) { /* TODO: 4/2/2018 raise GUI error : case -> barcode not found!!! */ }
@@ -122,7 +133,7 @@ public class DataManager {
         if (bike.getBikeModel().equals(CONSTANTS.GIANT_ESCAPE)) {
             BluetoothUtil bluetoothUtil = new BluetoothUtil(bike);
             bluetoothUtil.setEventbus(usageStatus);
-            Disposable shit = bluetoothUtil.getOnceSubscriber()
+            Disposable shit = bluetoothUtil.getOnceSubscriber().observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
                 .subscribe( item -> {nonce = item; borrowRequest(bike,location, bluetoothUtil);}, throwable -> {});
             bluetoothUtil.initBluetoothService();
         } else {

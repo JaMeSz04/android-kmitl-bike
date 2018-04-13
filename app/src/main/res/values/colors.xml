@@ -10,4 +10,7 @@
     <color name="white">#FFFFFF</color>
     <color name="divider">#B6B6B6</color>
     <color name="shubu_transparent">#EEFFFFFF</color>
+    <color name="KMITLBIKE_DARK">#689F38</color>
+    <color name="KMITLBIKE_GREEN">#AFB42B</color>
+    <color name="KMITLBIKE_BACKGROUND">#F4F4F4</color>
 </resources>

@@ -19,8 +19,6 @@
 
             <include layout="@layout/bottomsheet_toolbar"/>
 
-
-
             <TextView
                 android:id="@+id/InstructionTitle"
                 android:layout_width="match_parent"

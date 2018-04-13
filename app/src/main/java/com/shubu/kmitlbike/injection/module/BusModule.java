@@ -7,6 +7,7 @@ import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.google.zxing.Result;
 import com.shubu.kmitlbike.data.state.BikeState;
+import com.shubu.kmitlbike.ui.common.MapEvent;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class BusModule {
     public static final String BIKE_STATE_PROVIDER = "BIKE_STATE_PROVIDER";
     public static final String BIKE_PASSWORD_PROVIDER = "BIKE_PASSWORD_PROVIDER";
     public static final String LOCATION_PROVIDER = "LOCATION_PROVIDER";
+    public static final String MAP_EVENT_PROVIDER = "MAP_EVENT_PROVIDER";
 
     @Provides
     @Singleton
@@ -61,4 +63,9 @@ public class BusModule {
     @Singleton
     @Named(LOCATION_PROVIDER)
     static PublishSubject<Location> provideLocation() { return PublishSubject.create(); }
+
+    @Provides
+    @Singleton
+    @Named(MAP_EVENT_PROVIDER)
+    static PublishSubject<Location> provideMapEvent() { return PublishSubject.create(); }
 }

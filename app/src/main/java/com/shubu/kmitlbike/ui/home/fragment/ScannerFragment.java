@@ -45,7 +45,6 @@ public class ScannerFragment extends BaseFragment {
                              Bundle savedInstanceState) {
 
         View root = inflater.inflate(R.layout.fragment_scanner, container, false);
-
         ButterKnife.bind(this,root);
         Activity activity = getActivity();
         mCodeScanner = new CodeScanner(activity, scannerView);

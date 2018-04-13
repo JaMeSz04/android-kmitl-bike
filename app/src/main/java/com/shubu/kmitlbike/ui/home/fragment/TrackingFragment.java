@@ -6,20 +6,17 @@ import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.shubu.kmitlbike.R;
-import com.shubu.kmitlbike.ui.base.BaseFragment;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
-import com.shubu.kmitlbike.ui.home.fragment.interfaces.BaseBottomSheetFragment;
+import com.shubu.kmitlbike.ui.base.BaseBottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.ReturnListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -100,9 +97,10 @@ public class TrackingFragment extends BaseBottomSheetFragment {
         // Inflate the layout for this fragment
         Timber.e("hehe");
         View view = inflater.inflate(R.layout.fragment_tracking, container, false);
-        ButterKnife.bind(this, view);
+        ButterKnife.bind(this,view);
         this.setFooterButton();
         this.setRideOnClick();
+        this.setbListener();
         this.bikeImage.setImageResource( this.bikeName.equals(CONSTANTS.GIANT_ESCAPE)? R.drawable.giant_escape : R.drawable.la_green);
         this.timeRemainingText.setText(this.bikeDuration + TIMER_UNIT);
         this.finalTimeText.setText(this.getFinalDuration());

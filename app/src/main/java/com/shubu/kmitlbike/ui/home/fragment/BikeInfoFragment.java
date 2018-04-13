@@ -5,16 +5,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.shubu.kmitlbike.R;
-import com.shubu.kmitlbike.ui.base.BaseFragment;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
-import com.shubu.kmitlbike.ui.home.fragment.interfaces.BaseBottomSheetFragment;
+import com.shubu.kmitlbike.ui.base.BaseBottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.BorrowListener;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.ScannerListener;
 
@@ -105,6 +102,7 @@ public class BikeInfoFragment extends BaseBottomSheetFragment {
         View view = inflater.inflate(R.layout.fragment_bike_info, container, false);
         ButterKnife.bind(this,view);
         this.setRideOnClick();
+        this.setbListener();
         this.subtitleText.setText(this.bikeModel);
         this.nameText.setText(this.bikeName);
         this.lockText.setText(this.bikeModel.equals(CONSTANTS.GIANT_ESCAPE)? "InfiniLock" : "Manual Lock" );

@@ -5,13 +5,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.shubu.kmitlbike.R;
-import com.shubu.kmitlbike.ui.base.BaseFragment;
-import com.shubu.kmitlbike.ui.home.fragment.interfaces.BaseBottomSheetFragment;
+import com.shubu.kmitlbike.ui.base.BaseBottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.StatusListener;
 
 import butterknife.BindView;
@@ -72,10 +70,12 @@ public class StatusFragment extends BaseBottomSheetFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
         View view = inflater.inflate(R.layout.fragment_status, container, false);
-        ButterKnife.bind(this, view);
+        ButterKnife.bind(this,view);
         setRideOnClick();
         setFooterButton();
+        this.setbListener();
         footerButton.setVisibility(View.INVISIBLE);
         eventBus.getBikeState().subscribe( state -> {
             Timber.i("on new state : " + state.toString());

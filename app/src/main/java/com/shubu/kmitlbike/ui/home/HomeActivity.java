@@ -7,6 +7,7 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
@@ -19,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.annimon.stream.Stream;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -28,11 +30,14 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.shubu.kmitlbike.R;
+import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
+import com.shubu.kmitlbike.ui.common.MapEvent;
+import com.shubu.kmitlbike.ui.detail.TermsAndConditionsActivity;
 import com.shubu.kmitlbike.ui.home.fragment.BikeInfoFragment;
 import com.shubu.kmitlbike.ui.home.fragment.TrackingFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.BorrowListener;
@@ -44,9 +49,12 @@ import com.shubu.kmitlbike.ui.home.fragment.interfaces.ReturnListener;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.ScannerListener;
 import com.shubu.kmitlbike.ui.home.fragment.StatusFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.StatusListener;
+import com.shubu.kmitlbike.ui.login.LoginActivity;
 import com.shubu.kmitlbike.ui.profile.ProfileActivity;
 import com.shubu.kmitlbike.util.HomeBottomSheetBehavior;
 import com.shubu.kmitlbike.ui.home.fragment.HomeFragment;
+
+import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -82,7 +90,6 @@ public class HomeActivity extends BaseActivity implements
     @BindView(R.id.nav_view)
     NavigationView navigationView;
 
-
     private Fragment scannerFragment;
     private Fragment bikeInfoFragment;
     private Fragment bikeStatusFragment;
@@ -104,7 +111,7 @@ public class HomeActivity extends BaseActivity implements
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         client = LocationServices.getFusedLocationProviderClient(this);
         this.initializeServicesFacade();
-        this.initializeNavigationDrawer();
+
 
         if (savedInstanceState == null)
             this.constructFragment();
@@ -118,10 +125,16 @@ public class HomeActivity extends BaseActivity implements
                     public boolean onNavigationItemSelected(MenuItem item) {
                         navigationDrawer.closeDrawers();
                         instantiateActivity(item.getTitle().toString());
-                        return true;
+                        return false;
                     }
                 }
         );
+        LoginResponse user = presenter.getUser();
+        View header = navigationView.getHeaderView(0);
+        TextView navigationTitle = (TextView) header.findViewById(R.id.NavigationDrawerTitle);
+        TextView navigationSubtitle = (TextView) header.findViewById(R.id.NavigationDrawerSubtitle);
+        navigationTitle.setText(user.getFirstName() + " " + user.getLastName());
+        navigationSubtitle.setText(user.getEmail());
     }
 
     private void instantiateActivity(String choices){
@@ -131,6 +144,17 @@ public class HomeActivity extends BaseActivity implements
             case "Profile":
                 intent = new Intent(this, ProfileActivity.class);
                 break;
+            case "Report":
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/kmitlgreencampus/"));
+                break;
+            case "Terms and Conditions":
+                intent = new Intent(this, TermsAndConditionsActivity.class);
+                break;
+            case "Logout":
+                presenter.onLockout();
+                intent = new Intent(this, LoginActivity.class);
+                break;
+
         }
 
         if (intent != null)
@@ -141,6 +165,7 @@ public class HomeActivity extends BaseActivity implements
         this.initiatePresenter();
         this.initiateBottomSheet();
         this.initiateEventBus();
+        this.initializeNavigationDrawer();
     }
 
     private void initiatePresenter(){
@@ -210,6 +235,27 @@ public class HomeActivity extends BaseActivity implements
         toggleBottomSheet();
     }
 
+    @Override
+    public void onRefreshBike() {
+        presenter.getBikeList();
+    }
+
+    @Override
+    public void onRefreshLocation() {
+        try {
+            client.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null)
+                        eventBus.getMapEvent().onNext(location);
+                }
+            });
+        } catch (SecurityException e){
+            Timber.e(e);
+        }
+
+    }
+
 
     @Override
     public void onScannerStart() {
@@ -226,6 +272,7 @@ public class HomeActivity extends BaseActivity implements
 
     @Override
     public void onBikeListUpdate(List<Bike> bikes) {
+        Timber.e("updated");
         this.eventBus.getBike().onNext(bikes); //publish bikes to subscribers
     }
 

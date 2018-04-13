@@ -16,6 +16,7 @@ import javax.inject.Singleton;
 import dagger.Component;
 import rx.subjects.PublishSubject;
 import com.google.zxing.Result;
+import com.shubu.kmitlbike.ui.common.MapEvent;
 
 @Component(modules = BusModule.class)
 @Singleton
@@ -38,6 +39,9 @@ public interface BusComponent {
 
     @Named(BusModule.LOCATION_PROVIDER)
     PublishSubject<Location> getLocation();
+
+    @Named(BusModule.MAP_EVENT_PROVIDER)
+    PublishSubject<Location> getMapEvent();
 
 
 }

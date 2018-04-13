@@ -5,12 +5,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+
 import com.shubu.kmitlbike.R;
-import com.shubu.kmitlbike.ui.home.fragment.interfaces.BaseBottomSheetFragment;
+import com.shubu.kmitlbike.ui.base.BaseBottomSheetFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.ScannerListener;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
@@ -31,6 +30,7 @@ public class BottomSheetFragment extends BaseBottomSheetFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
     }
 
@@ -59,10 +59,11 @@ public class BottomSheetFragment extends BaseBottomSheetFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_bottom_sheet, container, false);
-        // Inflate the layout for this fragment
         ButterKnife.bind(this,view);
+        // Inflate the layout for this fragment
         this.setRideOnClick();
         this.setFooterButton();
+        this.setbListener();
         return view;
     }
 

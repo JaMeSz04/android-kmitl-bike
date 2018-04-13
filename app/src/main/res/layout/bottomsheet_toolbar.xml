@@ -4,18 +4,20 @@
     android:layout_width="match_parent"
     android:layout_height="80dp"
     android:layout_alignParentTop="true"
+    android:background="@drawable/round_card"
    >
-        <ImageButton
-            android:id="@+id/BottomSheetControlReloadButton"
-            style="@style/Widget.AppCompat.ImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_margin="16dp"
-            android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_rotate"
-            android:tint="@android:color/background_dark" />
+
+    <ImageButton
+        android:id="@+id/BottomSheetControlReloadButton"
+        style="@style/Widget.AppCompat.ImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="16dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ic_refresh_black_24dp"
+        android:tint="@android:color/background_dark" />
 
         <LinearLayout
             android:id="@+id/Ride_Button"
@@ -41,23 +43,22 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
                 android:layout_weight="1"
-                android:fontFamily="monospace"
                 android:text="RIDE"
                 android:textColor="@android:color/background_dark"
                 android:textSize="24sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/BottomSheetControlLockStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_margin="16dp"
-            android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_lock_lock"
-            android:tint="@android:color/background_dark" />
+    <ImageButton
+        android:id="@+id/BottomSheetControlGetLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="16dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ic_my_location_black_24dp"
+        android:tint="@android:color/background_dark" />
 
         <View
             android:id="@+id/divider"

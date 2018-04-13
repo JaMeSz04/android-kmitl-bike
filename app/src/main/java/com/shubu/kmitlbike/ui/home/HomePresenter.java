@@ -3,7 +3,9 @@ package com.shubu.kmitlbike.ui.home;
 import android.location.Location;
 
 import com.google.zxing.Result;
+import com.orhanobut.hawk.Hawk;
 import com.shubu.kmitlbike.data.DataManager;
+import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
 import com.shubu.kmitlbike.data.model.bike.BikeBorrowResponse;
@@ -45,6 +47,11 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
         super.attachView(mvpView);
         mSubscriptions = new CompositeDisposable();
     }
+
+    public LoginResponse getUser(){
+        return mDataManager.getCurrentUser();
+    }
+
     public void onDestroy(){
         mSubscriptions.dispose();
     }
@@ -66,6 +73,10 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
                 error -> Timber.i("error: " + error.toString())
 
             ));
+    }
+
+    public void onLockout(){
+        Hawk.deleteAll();
     }
 
     public void getUsagePlan(){

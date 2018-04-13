@@ -5,6 +5,22 @@
             android:id="@+id/menu_profile"
             android:icon="@drawable/ic_account_box_black_24dp"
             android:title="Profile" />
+        <item
+            android:id="@+id/menu_report"
+            android:icon="@drawable/ic_report_problem_black_24dp"
+            android:title="Report" />
+        <item
+            android:id="@+id/menu_condition"
+            android:icon="@drawable/ic_description_black_24dp"
+            android:title="Terms and Conditions" />
+        <item
+            android:id="@+id/menu_license"
+            android:icon="@drawable/ic_library_books_black_24dp"
+            android:title="Licenses" />
+        <item
+            android:id="@+id/menu_logout"
+            android:icon="@drawable/ic_exit_to_app_black_24dp"
+            android:title="Logout" />
 
     </group>
 </menu>
