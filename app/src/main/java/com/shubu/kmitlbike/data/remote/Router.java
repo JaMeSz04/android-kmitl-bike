@@ -4,6 +4,7 @@ package com.shubu.kmitlbike.data.remote;
 import com.shubu.kmitlbike.data.model.History;
 import com.shubu.kmitlbike.data.model.ProfileHistory;
 import com.shubu.kmitlbike.data.model.Token;
+import com.shubu.kmitlbike.data.model.UserSession;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
@@ -15,6 +16,7 @@ import com.shubu.kmitlbike.data.model.bike.BikeBorrowResponse;
 import com.shubu.kmitlbike.data.model.bike.BikeReturnForm;
 import com.shubu.kmitlbike.data.model.bike.BikeReturnResponse;
 import com.shubu.kmitlbike.data.model.bike.Location;
+import com.shubu.kmitlbike.data.model.bike.Session;
 
 import java.util.List;
 
@@ -45,8 +47,8 @@ public interface Router {
     @GET("api/v1/bikes/plans/list")
     Single<List<UsagePlan>> getUsagePlan();
 
-    @GET("api/v1/info/terms_conditions")
-
+    @GET("api/v1/users/{id}/session")
+    Single<UserSession> getUserSession(@Path("id") int userid);
 
     @POST("api/v1/bikes/{id}/borrow")
     Single<BikeBorrowResponse> borrowBike(@Path("id") int id, @Body BikeBorrowRequest request);

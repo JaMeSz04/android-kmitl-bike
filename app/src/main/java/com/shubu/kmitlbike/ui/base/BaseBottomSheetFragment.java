@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.ui.base.BaseFragment;
@@ -22,6 +23,9 @@ import timber.log.Timber;
 public abstract class BaseBottomSheetFragment extends BaseFragment {
     @BindView(R.id.Ride_Button)
     public LinearLayout rideButton;
+
+    @BindView(R.id.ButtomSheetControlActionButton)
+    public TextView rideButtonText;
 
     @BindView(R.id.bottom_sheet_footer_button)
     public Button footerButton;

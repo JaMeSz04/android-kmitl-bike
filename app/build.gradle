@@ -16,7 +16,7 @@ android {
         versionName '1.0.0'
 
         buildConfigField("String", "BASE_URL",
-                "\"http://ec2-54-255-207-48.ap-southeast-1.compute.amazonaws.com:8888/\"")
+                "\"http://161.246.94.246:1995/\"")
     }
     buildTypes {
         release {

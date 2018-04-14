@@ -33,6 +33,7 @@ import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.UsagePlan;
+import com.shubu.kmitlbike.data.model.bike.Session;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
@@ -277,6 +278,11 @@ public class HomeActivity extends BaseActivity implements
     }
 
     @Override
+    public void onUserSessionUpdate() {
+        startTracking();
+    }
+
+    @Override
     public void onUsagePlanUpdate(List<UsagePlan> plans) {
         Timber.i("new plan" + plans.toString());
         this.eventBus.getPlan().onNext(plans);
@@ -331,36 +337,33 @@ public class HomeActivity extends BaseActivity implements
                 eventBus.getBikeState().onCompleted();
                 sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-                FragmentManager manager =  getFragmentManager();
-                FragmentTransaction ft = manager.beginTransaction();
-                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-
-                trackingFragment = TrackingFragment.newInstance(presenter.getSession().getBikeModel(), 60);
-                ft.replace(bottomSheetLayout.getId(), trackingFragment).commit();
-
-                ft.remove(bikeStatusFragment);
-
-                this.startLocationUpdate();
+                this.startTracking();
                 //collapse bottomsheet
                 break;
             case CONSTANTS.LA_GREEN:
                 Timber.e("borrow completed");
                 eventBus.getBikePassword().onNext(bike.getMacAddress());
+                break;
         }
     }
 
-    @Override
-    public void onStatusBorrowCompleted() { //manual bike event trigger!
+    private void startTracking(){
         FragmentManager manager =  getFragmentManager();
         FragmentTransaction ft = manager.beginTransaction();
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
 
         trackingFragment = TrackingFragment.newInstance(presenter.getSession().getBikeModel(), 60);
         ft.replace(bottomSheetLayout.getId(), trackingFragment).commit();
-        sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
         ft.remove(bikeStatusFragment);
-        // TODO: 4/5/2018  start tracking
+
         this.startLocationUpdate();
+    }
+
+    @Override
+    public void onStatusBorrowCompleted() { //manual bike event trigger!
+        sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        this.startTracking();
     }
 
     @Override

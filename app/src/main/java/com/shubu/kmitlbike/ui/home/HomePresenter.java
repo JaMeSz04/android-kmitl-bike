@@ -145,6 +145,16 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
                     throwable -> Timber.e(throwable));
     }
 
+    public void getUserSession(){
+        mSubscriptions.add(mDataManager.getUserSession().observeOn( AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(
+            userSession -> {
+                if(userSession.isResume())
+                    getMvpView().onUserSessionUpdate();
+            },
+            throwable -> Timber.e(throwable)
+        ));
+    }
+
 
 
 

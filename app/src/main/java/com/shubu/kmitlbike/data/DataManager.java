@@ -16,6 +16,7 @@ import com.shubu.kmitlbike.data.adapter.LocationAdapter;
 import com.shubu.kmitlbike.data.model.History;
 import com.shubu.kmitlbike.data.model.ProfileHistory;
 import com.shubu.kmitlbike.data.model.Token;
+import com.shubu.kmitlbike.data.model.UserSession;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
@@ -25,6 +26,7 @@ import com.shubu.kmitlbike.data.model.bike.BikeBorrowRequest;
 import com.shubu.kmitlbike.data.model.bike.BikeBorrowResponse;
 import com.shubu.kmitlbike.data.model.bike.BikeReturnForm;
 import com.shubu.kmitlbike.data.model.bike.BikeReturnResponse;
+import com.shubu.kmitlbike.data.model.bike.Session;
 import com.shubu.kmitlbike.data.remote.Router;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
@@ -112,6 +114,10 @@ public class DataManager {
 
     public void setUsagePlans(List<UsagePlan> usagePlans) {
         this.usagePlans = usagePlans;
+    }
+
+    public Single<UserSession> getUserSession(){
+        return mRouter.getUserSession(this.currentUser.getId());
     }
 
     public PublishSubject<BikeState> initializeBorrowService(Bike bike) {

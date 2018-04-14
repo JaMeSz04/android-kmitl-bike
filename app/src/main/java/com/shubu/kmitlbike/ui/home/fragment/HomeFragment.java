@@ -101,11 +101,6 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
         if (location == null)
             return;
         //updqate user location
-        Marker usermarker = googleMap.addMarker(new MarkerOptions()
-                .flat(true)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_my_location))
-                .anchor(0.5f,0.5f)
-                .position(new LatLng(location.getLatitude(), location.getLongitude())));
         googleMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
 
         Polyline line = this.googleMap.addPolyline(

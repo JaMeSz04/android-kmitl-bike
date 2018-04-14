@@ -53,7 +53,12 @@ public class StatusFragment extends BaseBottomSheetFragment {
 
     @Override
     protected void setRideOnClick() {
-        bListener.onToggle();
+        rideButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bListener.onToggle();
+            }
+        });
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.shubu.kmitlbike.ui.home.fragment;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
@@ -77,7 +78,13 @@ public class TrackingFragment extends BaseBottomSheetFragment {
 
     @Override
     protected void setRideOnClick() {
-        bListener.onToggle();
+
+        rideButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bListener.onToggle();
+            }
+        });
     }
 
     @Override
@@ -98,6 +105,8 @@ public class TrackingFragment extends BaseBottomSheetFragment {
         Timber.e("hehe");
         View view = inflater.inflate(R.layout.fragment_tracking, container, false);
         ButterKnife.bind(this,view);
+        rideButtonText.setText("RETURN");
+        rideButtonText.setTextColor(Color.parseColor("#0FA143"));
         this.setFooterButton();
         this.setRideOnClick();
         this.setbListener();
