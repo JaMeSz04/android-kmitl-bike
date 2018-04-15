@@ -28,6 +28,7 @@ public class KMITLBikeApplication extends Application  {
         Hawk.init(this.getApplicationContext()).build();
         eventBus = DaggerBusComponent.create();
         bluetooth = RxBleClient.create(this.getApplicationContext());
+        appContext = getApplicationContext();
         RxBleClient.setLogLevel(RxBleLog.DEBUG);
         RxBleLog.setLogger((level,tag,msg) -> Timber.tag(tag).log(level,msg));
         //BluetoothComponent bluetooth = DaggerBluetoothComponent.builder().build();
@@ -36,6 +37,9 @@ public class KMITLBikeApplication extends Application  {
         }
     }
 
+    public static Context getAppContext(){
+        return appContext;
+    }
 
     public static BusComponent getEventBus(){
         return eventBus;

@@ -32,6 +32,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
@@ -66,7 +67,6 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
         activityComponent().inject(this);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
-        presenter.validateToken();
         presenter.attachView(this);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -302,7 +302,14 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 
     @Override
     public void showError(String error) {
-        Timber.i(error);
+        MaterialDialog.Builder dialog ;
+        if (error.equals("")) {
+            dialog = new MaterialDialog.Builder(this).title("Error").content("unexpected error... try again");
+        } else {
+            dialog = new MaterialDialog.Builder(this).title("Error").content(error);
+        }
+        dialog.build();
+        dialog.show();
     }
 
 
@@ -317,7 +324,6 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 
             case "register" :
                 break;
-
         }
     }
 

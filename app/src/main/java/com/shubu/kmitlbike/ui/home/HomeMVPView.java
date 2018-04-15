@@ -15,10 +15,12 @@ public interface HomeMVPView extends MvpView {
     void onUserSessionUpdate();
     void onUsagePlanUpdate(List<UsagePlan> plans);
     void onScannerBikeUpdate(Bike bike);
+    void onScannerReturnUpdate(Bike bike);
     void onLocationUpdate(Location location);
-    void onBorrowStatusUpdate(BikeState status);
+    void onStatusUpdate(BikeState status);
     void onBorrowCompleted(Bike bike);
     void onReturnCompleted();
+    void onError(String error);
 }
 
 

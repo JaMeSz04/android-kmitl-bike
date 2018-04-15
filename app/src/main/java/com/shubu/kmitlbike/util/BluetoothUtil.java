@@ -25,7 +25,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.SingleSubject;
 import rx.SingleSubscriber;
-import rx.subjects.PublishSubject;
+import io.reactivex.subjects.PublishSubject;
 import timber.log.Timber;
 
 
@@ -125,7 +125,7 @@ public class BluetoothUtil {
             case "NONCE":
                 onceSubscriber.onSuccess(command[1]);
             case "BORROW":
-                eventbus.onCompleted();
+                eventbus.onComplete();
 
         }
 

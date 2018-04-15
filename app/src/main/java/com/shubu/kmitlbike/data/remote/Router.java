@@ -5,6 +5,8 @@ import com.shubu.kmitlbike.data.model.History;
 import com.shubu.kmitlbike.data.model.ProfileHistory;
 import com.shubu.kmitlbike.data.model.Token;
 import com.shubu.kmitlbike.data.model.UserSession;
+import com.shubu.kmitlbike.data.model.VersionForm;
+import com.shubu.kmitlbike.data.model.VersionResponse;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
@@ -58,6 +60,9 @@ public interface Router {
 
     @POST("api/v1/bikes/update")
     Single<Object> updateTrackingLocation(@Body Location location);
+
+    @POST("api/v1/versions/check")
+    Single<VersionResponse> getVersion(@Body VersionForm form);
 
 
 

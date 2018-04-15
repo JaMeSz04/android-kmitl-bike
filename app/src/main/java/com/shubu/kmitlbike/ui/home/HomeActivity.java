@@ -22,7 +22,9 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.annimon.stream.Stream;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -114,6 +116,7 @@ public class HomeActivity extends BaseActivity implements
         this.initializeServicesFacade();
 
 
+
         if (savedInstanceState == null)
             this.constructFragment();
 
@@ -173,7 +176,7 @@ public class HomeActivity extends BaseActivity implements
         presenter.attachView(this);
         presenter.getBikeList();
         presenter.getUsagePlan();
-
+        presenter.subscribeError();
     }
 
     private void initiateEventBus(){
@@ -188,7 +191,7 @@ public class HomeActivity extends BaseActivity implements
                 Timber.e("borrow confirmed");
                 //start tracking
             }
-            @Override public void onError(Throwable e) {}
+            @Override public void onError(Throwable e) { HomeActivity.this.onError(""); }
             @Override public void onNext(BikeState bikeState) {}
         });
     }
@@ -252,7 +255,7 @@ public class HomeActivity extends BaseActivity implements
                 }
             });
         } catch (SecurityException e){
-            Timber.e(e);
+            this.onError("Please enable location services");
         }
 
     }
@@ -300,6 +303,16 @@ public class HomeActivity extends BaseActivity implements
 
     }
 
+    @Override
+    public void onScannerReturnUpdate(Bike bike) {
+        FragmentManager manager =  getFragmentManager();
+        FragmentTransaction ft = manager.beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+        ft.hide(scannerFragment);
+        manager.popBackStack();
+        this.onReturnStart(bike);
+    }
+
     //BIKE BORROW/RETURN EVENTBUS
 
     @Override
@@ -320,12 +333,12 @@ public class HomeActivity extends BaseActivity implements
                 }
             });
         } catch (SecurityException e){
-            Timber.e(e.toString());
+            this.onError("Please enable location service");
         }
     }
 
     @Override
-    public void onBorrowStatusUpdate(BikeState status) {
+    public void onStatusUpdate(BikeState status) {
         this.eventBus.getBikeState().onNext(status);
     }
 
@@ -336,7 +349,6 @@ public class HomeActivity extends BaseActivity implements
             case CONSTANTS.GIANT_ESCAPE:
                 eventBus.getBikeState().onCompleted();
                 sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
                 this.startTracking();
                 //collapse bottomsheet
                 break;
@@ -357,6 +369,7 @@ public class HomeActivity extends BaseActivity implements
 
         ft.remove(bikeStatusFragment);
 
+
         this.startLocationUpdate();
     }
 
@@ -368,6 +381,20 @@ public class HomeActivity extends BaseActivity implements
 
     @Override
     public void onReturn() {
+        scannerFragment = new ScannerFragment();
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        ft.replace(scanner.getId(), scannerFragment).addToBackStack("scanner").commit();
+
+    }
+
+    private void onReturnStart(Bike bike){
+        FragmentManager manager =  getFragmentManager();
+        FragmentTransaction ft = manager.beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        ft.hide(trackingFragment);
+        bikeStatusFragment = StatusFragment.newInstance(null);
+        ft.replace(bottomSheetLayout.getId(), bikeStatusFragment).commit();
 
         client.removeLocationUpdates(locationHandler);
         try {
@@ -375,11 +402,11 @@ public class HomeActivity extends BaseActivity implements
                 @Override
                 public void onSuccess(Location location) {
                     if (location != null)
-                        presenter.onReturnStart(location);
+                        presenter.onReturnStart(bike, location);
                 }
             });
         } catch (SecurityException e){
-            Timber.e(e);
+            this.onError("");
         }
     }
 
@@ -392,6 +419,18 @@ public class HomeActivity extends BaseActivity implements
         ft.hide(trackingFragment);
         ft.replace(bottomSheetLayout.getId(), bottomSheetFragment).commit();
         sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
+    @Override
+    public void onError(String error) {
+        MaterialDialog.Builder dialog ;
+        if (error.equals("")) {
+            dialog = new MaterialDialog.Builder(this).title("Error").content("unexpected error... try again");
+        } else {
+            dialog = new MaterialDialog.Builder(this).title("Error").content(error);
+        }
+        dialog.build();
+        dialog.show();
     }
 
 

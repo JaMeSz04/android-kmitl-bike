@@ -62,16 +62,6 @@ public class LoginPresenter extends BasePresenter<LoginMVPView> {
                 ));
     }
 
-    public void validateToken(){
-        if (Hawk.get("token","").isEmpty())
-            return;
-        Disposable validateTask = mDataManager.validateToken(Hawk.get("token", "")).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
-            .subscribe( loginResponse -> {
-                mDataManager.setCurrentUser(loginResponse);
-                getMvpView().redirect("main");
-            }, throwable -> {
-                Timber.e("token expired");
-            });
-    }
+
 
 }

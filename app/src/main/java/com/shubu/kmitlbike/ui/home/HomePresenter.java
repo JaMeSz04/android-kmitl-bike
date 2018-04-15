@@ -2,8 +2,10 @@ package com.shubu.kmitlbike.ui.home;
 
 import android.location.Location;
 
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.google.zxing.Result;
 import com.orhanobut.hawk.Hawk;
+import com.shubu.kmitlbike.KMITLBikeApplication;
 import com.shubu.kmitlbike.data.DataManager;
 import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.data.model.bike.Bike;
@@ -14,11 +16,13 @@ import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.base.BasePresenter;
 import com.shubu.kmitlbike.ui.base.MvpView;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
+import com.shubu.kmitlbike.ui.common.ErrorFactory;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observer;
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -37,7 +41,6 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
     private CompositeDisposable mSubscriptions;
 
 
-
     @Inject
     public HomePresenter(DataManager dataManager) {
         mDataManager = dataManager;
@@ -47,6 +50,12 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
         super.attachView(mvpView);
         mSubscriptions = new CompositeDisposable();
     }
+
+    public void subscribeError() {
+        mSubscriptions.add(mDataManager.getErrorSubject().observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
+                .subscribe(error -> getMvpView().onError(error)));
+    }
+
 
     public LoginResponse getUser(){
         return mDataManager.getCurrentUser();
@@ -60,7 +69,6 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
         return mDataManager.getUsingBike();
     }
 
-
     public void getBikeList() {
         mSubscriptions.add(mDataManager.getBikeList()
             .observeOn(AndroidSchedulers.mainThread())
@@ -70,7 +78,7 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
                     mDataManager.setBikeList(listBike);
                     getMvpView().onBikeListUpdate(listBike);
                 },
-                error -> Timber.i("error: " + error.toString())
+                error -> mDataManager.setError("Unable to connect to the server...")
 
             ));
     }
@@ -87,50 +95,73 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
                     mDataManager.setUsagePlans(usagePlans);
                     getMvpView().onUsagePlanUpdate(usagePlans);
                 },
-                throwable -> {}
+                throwable -> mDataManager.setError("Unable to connect to the server")
             ));
     }
 
     public void onScanComplete(Result code){
         Timber.i("HomePresenter on receive : " + code.getText());
         Bike bike = mDataManager.getBikeFromScannerCode(code);
-        mDataManager.setUsingBike(bike);
-        getMvpView().onScannerBikeUpdate(bike);
+        if (bike == null)
+            return;
+        if (mDataManager.getUsingBike() == null) { // borrow case
+            mDataManager.setUsingBike(bike);
+            getMvpView().onScannerBikeUpdate(bike);
+        } else {
+            if (!mDataManager.validateBikeReturn(bike)) {
+                mDataManager.setError("Please return the bike you've borrowed");
+                return;
+            }
+            mDataManager.setUsingBike(null);
+            getMvpView().onScannerReturnUpdate(bike);
+        }
     }
+
 
     public void onBorrowStart(Location location){
         Bike bike = mDataManager.getUsingBike();
         Timber.e("currentbike : " + bike.toString());
-        mDataManager.initializeBorrowService(bike).subscribe(new Subscriber<BikeState>() {
+        mDataManager.initializeBorrowReturnService(bike, true).subscribe(new Observer<BikeState>() {
             @Override
-            public void onCompleted() {
-                getMvpView().onBorrowCompleted(bike);
-            }
+            public void onComplete() { getMvpView().onBorrowCompleted(bike); }
 
             @Override
             public void onError(Throwable e) {
-                Timber.e("borrow error!!! returning...");
-                onReturnStart(location);
+                mDataManager.setError("");
+                onReturnStart(bike, location);
             }
 
             @Override
-            public void onNext(BikeState s) {
-                getMvpView().onBorrowStatusUpdate(s);
-            }
+            public void onSubscribe(Disposable d) { }
+
+            @Override
+            public void onNext(BikeState s) { getMvpView().onStatusUpdate(s); }
         });
         mDataManager.performBorrow(bike,location);
     }
 
-    public void onReturnStart(Location location){
-        Bike bike = mDataManager.getUsingBike();
+    public void onReturnStart(Bike bike, Location location){
         Timber.i("current bike : " + bike.toString());
-        mSubscriptions.add(mDataManager.performReturn(bike, location)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .subscribe(
-                bikeReturnResponse -> getMvpView().onReturnCompleted(),
-                throwable -> Timber.e(throwable)
-            ));
+        mDataManager.initializeBorrowReturnService(bike, false).subscribe(new Observer<BikeState>() {
+
+            @Override
+            public void onError(Throwable e) {
+                mDataManager.setError("");
+            }
+
+            @Override
+            public void onComplete() { getMvpView().onReturnCompleted(); }
+
+            @Override
+            public void onSubscribe(Disposable d) { }
+
+            @Override
+            public void onNext(BikeState s) {
+                getMvpView().onStatusUpdate(s);
+            }
+        });
+        mDataManager.performReturn(bike, location);
+
     }
 
     public void updateLocation(Location location){
@@ -142,7 +173,7 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
                 .subscribeOn(Schedulers.io())
                 .subscribe(
                     object -> getMvpView().onLocationUpdate(location),
-                    throwable -> Timber.e(throwable));
+                    throwable -> mDataManager.setError(""));
     }
 
     public void getUserSession(){
@@ -151,8 +182,7 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
                 if(userSession.isResume())
                     getMvpView().onUserSessionUpdate();
             },
-            throwable -> Timber.e(throwable)
-        ));
+            throwable -> mDataManager.setError("")));
     }
 
 

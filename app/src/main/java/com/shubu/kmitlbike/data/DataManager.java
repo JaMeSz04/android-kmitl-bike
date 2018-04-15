@@ -1,6 +1,7 @@
 package com.shubu.kmitlbike.data;
 
 import android.bluetooth.BluetoothClass;
+import android.content.pm.PackageInfo;
 import android.location.Location;
 import android.provider.ContactsContract;
 
@@ -17,6 +18,8 @@ import com.shubu.kmitlbike.data.model.History;
 import com.shubu.kmitlbike.data.model.ProfileHistory;
 import com.shubu.kmitlbike.data.model.Token;
 import com.shubu.kmitlbike.data.model.UserSession;
+import com.shubu.kmitlbike.data.model.VersionForm;
+import com.shubu.kmitlbike.data.model.VersionResponse;
 import com.shubu.kmitlbike.data.model.bike.Bike;
 import com.shubu.kmitlbike.data.model.LoginForm;
 import com.shubu.kmitlbike.data.model.LoginResponse;
@@ -30,6 +33,7 @@ import com.shubu.kmitlbike.data.model.bike.Session;
 import com.shubu.kmitlbike.data.remote.Router;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
+import com.shubu.kmitlbike.ui.common.ErrorFactory;
 import com.shubu.kmitlbike.util.BluetoothUtil;
 import com.shubu.kmitlbike.util.UUIDHelper;
 
@@ -47,11 +51,15 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
+import io.reactivex.subjects.SingleSubject;
+import io.reactivex.subjects.PublishSubject;
 import timber.log.Timber;
 
 @Singleton
 public class DataManager {
+
+    private PublishSubject<BikeState> usageStatus;
+    private PublishSubject<String> errorStatus;
 
     private static final int TWO_MINUTES = 1000 * 60 * 2;
     private final Router mRouter;
@@ -59,15 +67,21 @@ public class DataManager {
     private Bike usingBike;
     private LoginResponse currentUser;
     private List<UsagePlan> usagePlans;
-    private PublishSubject<BikeState> usageStatus;
     private Location currentLocation = null;
     private List<Disposable> bluetoothTasks;
     private PublishSubject<String> commandNotification;
     private String nonce = null;
 
+
     @Inject
     public DataManager(Router router) {
         mRouter = router;
+    }
+
+    public PublishSubject<String> getErrorSubject() {
+        if (errorStatus == null)
+            errorStatus = PublishSubject.create();
+        return errorStatus;
     }
 
     public Single<LoginResponse> login(String username, String password) {
@@ -80,6 +94,14 @@ public class DataManager {
         return mRouter.tokenLogin( new Token(token) );
     }
 
+    public Single<VersionResponse> validateVersion(String version){
+        return mRouter.getVersion( new VersionForm("android", version) );
+    }
+
+    public boolean validateBikeReturn(Bike bike){
+        return bike.getBikeName().equals(this.usingBike.getBikeName());
+    }
+
     //BIKE MANAGER
 
     public Single<List<UsagePlan>> getUsagePlan() {
@@ -90,8 +112,19 @@ public class DataManager {
         return mRouter.getBikeList();
     }
 
-    public Single<BikeReturnResponse> performReturn(Bike bike, Location location) {
-        return mRouter.returnBike(bike.getId(), new BikeReturnForm(LocationAdapter.makeLocationForm(location), false));
+    public void performReturn(Bike bike, Location location) {
+        usageStatus.onNext(BikeState.RETURN_SCAN_START);
+        if (bike.getBikeModel().equals(CONSTANTS.LA_GREEN)) {
+            usageStatus.onNext(BikeState.RETURN_START);
+        } else {
+
+        }
+        Disposable task = mRouter.returnBike(bike.getId(), new BikeReturnForm(LocationAdapter.makeLocationForm(location), false)).observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(
+                        bikeReturnResponse -> usageStatus.onComplete(),
+                        throwable -> errorStatus.onNext("Unable to return bike... Try again later")
+                );
     }
 
     public Single<List<ProfileHistory>> getHistoryList(){
@@ -102,9 +135,14 @@ public class DataManager {
     }
 
     public Bike getBikeFromScannerCode(Result code) {
-        List<Bike> result = Stream.of(this.bikeList).filter(bike -> bike.getBarcode().equals(code.getText())).toList();
-        if (result.size() <= 0) { /* TODO: 4/2/2018 raise GUI error : case -> barcode not found!!! */ }
-        return result.get(0);
+
+        try {
+            List<Bike> result = Stream.of(this.bikeList).filter(bike -> bike.getBarcode().equals(code.getText())).toList();
+            return result.get(0);
+        } catch (Exception e){
+            errorStatus.onNext("");
+        }
+        return null;
     }
 
 
@@ -120,8 +158,11 @@ public class DataManager {
         return mRouter.getUserSession(this.currentUser.getId());
     }
 
-    public PublishSubject<BikeState> initializeBorrowService(Bike bike) {
-        this.usingBike = bike;
+    public PublishSubject<BikeState> initializeBorrowReturnService(Bike bike, boolean borrowFlag) {
+        if (borrowFlag)
+            this.usingBike = bike;
+        else
+            this.usingBike = null;
         this.usageStatus = PublishSubject.create();
         return this.usageStatus;
     }
@@ -139,8 +180,8 @@ public class DataManager {
         if (bike.getBikeModel().equals(CONSTANTS.GIANT_ESCAPE)) {
             BluetoothUtil bluetoothUtil = new BluetoothUtil(bike);
             bluetoothUtil.setEventbus(usageStatus);
-            Disposable shit = bluetoothUtil.getOnceSubscriber().observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
-                .subscribe( item -> {nonce = item; borrowRequest(bike,location, bluetoothUtil);}, throwable -> {});
+            Disposable bluetooth = bluetoothUtil.getOnceSubscriber().observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
+                .subscribe( item -> {nonce = item; borrowRequest(bike,location, bluetoothUtil);}, throwable -> errorStatus.onNext("Bluetooth initialization error"));
             bluetoothUtil.initBluetoothService();
         } else {
             borrowRequest(bike,location, null);
@@ -166,15 +207,14 @@ public class DataManager {
                         switch (bike.getBikeModel()) {
                             case CONSTANTS.GIANT_ESCAPE:
                                 bluetoothUtil.borrow(bikeBorrowResponse.getMessage());
-
                                 break;
                             case CONSTANTS.LA_GREEN:
-                                usageStatus.onCompleted();
+                                usageStatus.onComplete();
                         }
                     },
 
                     throwable -> {
-                        Timber.tag("on borrow : ").e(throwable);
+                        errorStatus.onNext("Unable to connect to the server... error incompleted");
                     }
                 );
     }
@@ -187,6 +227,10 @@ public class DataManager {
 
     public void setUsingBike(Bike usingBike) {
         this.usingBike = usingBike;
+    }
+
+    public void setError(String message){
+        errorStatus.onNext(message);
     }
 
 

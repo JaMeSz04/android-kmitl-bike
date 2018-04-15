@@ -7,6 +7,7 @@ import com.shubu.kmitlbike.ui.detail.TermsAndConditionsActivity;
 import com.shubu.kmitlbike.ui.home.HomeActivity;
 import com.shubu.kmitlbike.ui.login.LoginActivity;
 import com.shubu.kmitlbike.ui.profile.ProfileActivity;
+import com.shubu.kmitlbike.ui.splash.SplashActivity;
 
 import dagger.Subcomponent;
 
@@ -18,4 +19,5 @@ public interface ActivityComponent {
     void inject(HomeActivity homeActivity);
     void inject(ProfileActivity profileActivity);
     void inject(TermsAndConditionsActivity termsAndConditionsActivity);
+    void inject(SplashActivity splashActivity);
 }
