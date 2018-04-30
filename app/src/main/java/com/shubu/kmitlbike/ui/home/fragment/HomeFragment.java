@@ -11,14 +11,13 @@ import android.widget.ImageButton;
 
 import com.annimon.stream.Stream;
 import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
@@ -165,6 +164,7 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
 
     @Override
     public void onMapReady(GoogleMap mMap) {
+
         try {
             googleMap = mMap;
             googleMap.setMyLocationEnabled(true);
@@ -173,6 +173,7 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
             googleMap.getUiSettings().setZoomControlsEnabled(false);
             googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getActivity() ,R.raw.map_style ));
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CONSTANTS.KMITL_LOCATION, 18));
+
             this.updateBikeLocation();
         } catch ( SecurityException e){
             Timber.e(e);

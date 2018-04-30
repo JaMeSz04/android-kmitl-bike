@@ -46,6 +46,7 @@ public class SplashActivity extends BaseActivity implements SplashMVPView {
         try {
             PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
             String version = pInfo.versionName;
+            Timber.e("validating version");
             presenter.validateVersion(version);
         } catch (Exception e) {
             Timber.e(e);
@@ -56,6 +57,7 @@ public class SplashActivity extends BaseActivity implements SplashMVPView {
 
     @Override
     public void redirect(String where) {
+        Timber.e("redirecting");
         Intent intent;
         switch (where){
             case "main" :
@@ -65,6 +67,7 @@ public class SplashActivity extends BaseActivity implements SplashMVPView {
 
             case "login" :
                 intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
                 break;
 
         }

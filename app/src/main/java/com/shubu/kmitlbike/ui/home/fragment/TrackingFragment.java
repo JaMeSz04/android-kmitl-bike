@@ -1,9 +1,14 @@
 package com.shubu.kmitlbike.ui.home.fragment;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.v7.app.NotificationCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +18,9 @@ import android.widget.TextView;
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
 import com.shubu.kmitlbike.ui.base.BaseBottomSheetFragment;
+import com.shubu.kmitlbike.ui.home.HomeActivity;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.ReturnListener;
+import com.shubu.kmitlbike.ui.splash.SplashActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -22,6 +29,8 @@ import java.util.Date;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
+
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class TrackingFragment extends BaseBottomSheetFragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -131,9 +140,12 @@ public class TrackingFragment extends BaseBottomSheetFragment {
             public void onFinish() {
                 timeRemainingText.setText("Overdued");
                 finalTimeText.setText("Return this bike asap");
+                com.shubu.kmitlbike.ui.common.Notification.showNotification("Please return the bike ASAP!", getActivity());
             }
         }.start();
     }
+
+
 
     private String getFinalDuration(){
         //this code is using 1 hour session

@@ -47,14 +47,16 @@ public class SplashPresenter extends BasePresenter<SplashMVPView> {
     }
 
     private void validateToken(){
-        if (Hawk.get("token","").isEmpty())
+        if (Hawk.get("token","").isEmpty()) {
+            getMvpView().redirect("login");
             return;
+        }
         Disposable validateTask = mDataManager.validateToken(Hawk.get("token", "")).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
             .subscribe( loginResponse -> {
                 mDataManager.setCurrentUser(loginResponse);
                 getMvpView().redirect("main");
             }, throwable -> {
-                Timber.e("token expired");
+                getMvpView().redirect("login");
             });
     }
 }

@@ -126,7 +126,6 @@ public class HomeActivity extends BaseActivity implements
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         client = LocationServices.getFusedLocationProviderClient(this);
         this.initializeServicesFacade();
-
         if (savedInstanceState == null)
             this.constructFragment();
 
@@ -181,7 +180,7 @@ public class HomeActivity extends BaseActivity implements
         this.initiateEventBus();
         this.initializeNavigationDrawer();
         this.initializeGeofencing();
-        this.showNotification("test");
+
     }
 
     private void initializeGeofencing(){
@@ -542,22 +541,7 @@ public class HomeActivity extends BaseActivity implements
         }
     }
 
-    public void showNotification(String message){
-        Intent intent = new Intent(this, HomeActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-        Notification notification =
-                new NotificationCompat.Builder(this) // this is context
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("KMITL Bike")
-                        .setContentText(message)
-                        .setAutoCancel(true)
-                        .setContentIntent(pendingIntent)
-                        .build();
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(1000, notification);
-    }
 
 
 
