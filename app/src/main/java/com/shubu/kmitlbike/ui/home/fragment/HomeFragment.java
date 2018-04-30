@@ -10,6 +10,10 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import com.annimon.stream.Stream;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -48,7 +52,6 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
     private LatLng prevLocation;
     private List<Marker> markers;
     private DrawerListener mListener;
-
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -175,6 +178,17 @@ public class HomeFragment extends BaseFragment implements OnMapReadyCallback  {
             Timber.e(e);
         }
 
+    }
+
+
+
+
+    private GeofencingRequest getGeofencingRequest(Geofence geofence) {
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL);
+        builder.addGeofence(geofence);
+        return builder.build();
     }
 
 }

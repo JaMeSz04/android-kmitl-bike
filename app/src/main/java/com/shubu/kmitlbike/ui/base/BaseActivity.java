@@ -28,7 +28,6 @@ import timber.log.Timber;
  */
 public abstract class BaseActivity extends AppCompatActivity {
 
-
     protected BusComponent eventBus;
     private static final String KEY_ACTIVITY_ID = "KEY_ACTIVITY_ID";
     private static final AtomicLong NEXT_ID = new AtomicLong(0);

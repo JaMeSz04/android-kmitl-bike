@@ -4,6 +4,9 @@ import android.Manifest;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -15,6 +18,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.NotificationCompat;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,10 +30,15 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.annimon.stream.Stream;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.shubu.kmitlbike.R;
 import com.shubu.kmitlbike.data.model.LoginResponse;
@@ -54,6 +63,7 @@ import com.shubu.kmitlbike.ui.home.fragment.StatusFragment;
 import com.shubu.kmitlbike.ui.home.fragment.interfaces.StatusListener;
 import com.shubu.kmitlbike.ui.login.LoginActivity;
 import com.shubu.kmitlbike.ui.profile.ProfileActivity;
+import com.shubu.kmitlbike.util.GeofenceTransitionsIntentService;
 import com.shubu.kmitlbike.util.HomeBottomSheetBehavior;
 import com.shubu.kmitlbike.ui.home.fragment.HomeFragment;
 
@@ -100,6 +110,8 @@ public class HomeActivity extends BaseActivity implements
     private Fragment bottomSheetFragment;
     private LocationCallback locationHandler;
     private FusedLocationProviderClient client;
+    private GeofencingClient geofencingClient;
+    private PendingIntent mGeofencePendingIntent;
     protected BottomSheetBehavior sheetBehavior;
 
 
@@ -114,8 +126,6 @@ public class HomeActivity extends BaseActivity implements
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         client = LocationServices.getFusedLocationProviderClient(this);
         this.initializeServicesFacade();
-
-
 
         if (savedInstanceState == null)
             this.constructFragment();
@@ -170,13 +180,71 @@ public class HomeActivity extends BaseActivity implements
         this.initiateBottomSheet();
         this.initiateEventBus();
         this.initializeNavigationDrawer();
+        this.initializeGeofencing();
+        this.showNotification("test");
+    }
+
+    private void initializeGeofencing(){
+        geofencingClient = LocationServices.getGeofencingClient(this);
+        try {
+            geofencingClient.addGeofences(this.initGeofenceRequest(), this.getGeofencePendingIntent())
+                    .addOnSuccessListener(this, new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Timber.i("geofence init success");
+                        }
+                    })
+                    .addOnFailureListener(this, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                        }
+                    });
+        } catch (SecurityException e){
+            Timber.e(e);
+        }
+
+
+    }
+
+    private GeofencingRequest initGeofenceRequest(){
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT);
+        builder.addGeofence(this.initGeofence(CONSTANTS.KMITL_LOCATION, "kmitl"));
+        return builder.build();
+    }
+
+    private PendingIntent getGeofencePendingIntent() {
+        // Reuse the PendingIntent if we already have it.
+        if (mGeofencePendingIntent != null) {
+            return mGeofencePendingIntent;
+        }
+        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
+        // calling addGeofences() and removeGeofences().
+        mGeofencePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.
+                FLAG_UPDATE_CURRENT);
+        return mGeofencePendingIntent;
+    }
+
+    private Geofence initGeofence(LatLng location, String key) {
+        return new Geofence.Builder()
+                .setRequestId(key)
+                .setCircularRegion(location.latitude, location.longitude, CONSTANTS.KMITL_GEOLOCATION_RADIUS_METERS)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT |
+                        Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setLoiteringDelay(10000)
+                .build();
     }
 
     private void initiatePresenter(){
         presenter.attachView(this);
         presenter.getBikeList();
         presenter.getUsagePlan();
+        presenter.getUserSession();
         presenter.subscribeError();
+
     }
 
     private void initiateEventBus(){
@@ -282,7 +350,7 @@ public class HomeActivity extends BaseActivity implements
 
     @Override
     public void onUserSessionUpdate() {
-        startTracking();
+        this.startTracking();
     }
 
     @Override
@@ -472,6 +540,23 @@ public class HomeActivity extends BaseActivity implements
                 presenter.updateLocation(location);
             });
         }
+    }
+
+    public void showNotification(String message){
+        Intent intent = new Intent(this, HomeActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        Notification notification =
+                new NotificationCompat.Builder(this) // this is context
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle("KMITL Bike")
+                        .setContentText(message)
+                        .setAutoCancel(true)
+                        .setContentIntent(pendingIntent)
+                        .build();
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(1000, notification);
     }
 
 
