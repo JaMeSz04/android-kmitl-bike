@@ -33,7 +33,7 @@ public class ApplicationModule {
 
     @Provides
     @Singleton
-    Router provideMvpBoilerplateService() {
+    Router provideNetworkService() {
         return ServiceFactory.createClient();
     }
 

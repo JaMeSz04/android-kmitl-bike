@@ -320,6 +320,7 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
             case "main" :
                 intent = new Intent(this,HomeActivity.class);
                 startActivity(intent);
+                finish();
                 break;
 
             case "register" :
