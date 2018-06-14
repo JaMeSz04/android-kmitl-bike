@@ -30,7 +30,6 @@ import io.reactivex.Single;
 
 public interface Router {
 
-    
     @POST("api/v1/accounts/login")
     Single<LoginResponse> login(@Body LoginForm form);
 

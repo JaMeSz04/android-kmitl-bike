@@ -68,7 +68,7 @@ public class DataManager {
     private LoginResponse currentUser;
     private List<UsagePlan> usagePlans;
     private Location currentLocation = null;
-    private List<Disposable> bluetoothTasks;
+    private BluetoothUtil util;
     private PublishSubject<String> commandNotification;
     private String nonce = null;
 
@@ -117,14 +117,17 @@ public class DataManager {
         if (bike.getBikeModel().equals(CONSTANTS.LA_GREEN)) {
             usageStatus.onNext(BikeState.RETURN_START);
         } else {
-
+            usageStatus.onNext(BikeState.RETURN_START);
+            if (this.util == null)
+                this.util = new BluetoothUtil(bike);
+            this.util.initBluetoothService("RETURN");
         }
         Disposable task = mRouter.returnBike(bike.getId(), new BikeReturnForm(LocationAdapter.makeLocationForm(location), false)).observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(
-                        bikeReturnResponse -> usageStatus.onComplete(),
-                        throwable -> errorStatus.onNext("Unable to return bike... Try again later")
-                );
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                    bikeReturnResponse -> usageStatus.onComplete(),
+                    throwable -> errorStatus.onNext("Unable to return bike... Try again later")
+            );
     }
 
     public Single<List<ProfileHistory>> getHistoryList(){
@@ -176,17 +179,16 @@ public class DataManager {
     }
 
     public void performBorrow(Bike bike, Location location) {
-
         if (bike.getBikeModel().equals(CONSTANTS.GIANT_ESCAPE)) {
-            BluetoothUtil bluetoothUtil = new BluetoothUtil(bike);
-            bluetoothUtil.setEventbus(usageStatus);
-            Disposable bluetooth = bluetoothUtil.getOnceSubscriber().observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
-                .subscribe( item -> {nonce = item; borrowRequest(bike,location, bluetoothUtil);}, throwable -> errorStatus.onNext("Bluetooth initialization error"));
-            bluetoothUtil.initBluetoothService();
+            if (this.util == null)
+                this.util = new BluetoothUtil(bike);
+            this.util.setEventbus(usageStatus);
+            Disposable bluetooth = this.util.getOnceSubscriber().observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
+                .subscribe( item -> {nonce = item; borrowRequest(bike,location, this.util);}, throwable -> errorStatus.onNext("Bluetooth initialization error"));
+            this.util.initBluetoothService("BORROW");
         } else {
             borrowRequest(bike,location, null);
         }
-
     }
 
     private void borrowRequest(Bike bike, Location location, BluetoothUtil bluetoothUtil){
@@ -220,7 +222,6 @@ public class DataManager {
     }
 
 
-
     public Bike getUsingBike() {
         return usingBike;
     }
@@ -233,9 +234,7 @@ public class DataManager {
         errorStatus.onNext(message);
     }
 
-
     //LOCATION MANAGER
-
     public Location getCurrentLocation() {
         return this.currentLocation;
     }
@@ -249,36 +248,28 @@ public class DataManager {
 
     protected boolean isBetterLocation(Location location, Location currentBestLocation) {
         if (currentBestLocation == null) {
-            // A new location is always better than no location
             return true;
         }
 
-        // Check whether the new location fix is newer or older
         long timeDelta = location.getTime() - currentBestLocation.getTime();
         boolean isSignificantlyNewer = timeDelta > TWO_MINUTES;
         boolean isSignificantlyOlder = timeDelta < -TWO_MINUTES;
         boolean isNewer = timeDelta > 0;
 
-        // If it's been more than two minutes since the current location, use the new location
-        // because the user has likely moved
         if (isSignificantlyNewer) {
             return true;
-            // If the new location is more than two minutes older, it must be worse
         } else if (isSignificantlyOlder) {
             return false;
         }
 
-        // Check whether the new location fix is more or less accurate
         int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
         boolean isLessAccurate = accuracyDelta > 0;
         boolean isMoreAccurate = accuracyDelta < 0;
         boolean isSignificantlyLessAccurate = accuracyDelta > 200;
 
-        // Check if the old and new location are from the same provider
         boolean isFromSameProvider = isSameProvider(location.getProvider(),
                 currentBestLocation.getProvider());
 
-        // Determine location quality using a combination of timeliness and accuracy
         if (isMoreAccurate) {
             return true;
         } else if (isNewer && !isLessAccurate) {
@@ -295,7 +286,4 @@ public class DataManager {
         }
         return provider1.equals(provider2);
     }
-
-    //BLUETOOTH MANAGER
-
 }

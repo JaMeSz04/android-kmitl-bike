@@ -43,6 +43,8 @@ public class SplashPresenter extends BasePresenter<SplashMVPView> {
                     getMvpView().onRequiredupdate("\"https://play.google.com/store/apps/details?id=com.bike.kmitl.kmitlbike\"");
                 else
                     this.validateToken();
+            }, throwable -> {
+                Timber.e("can not connect to the server : " + throwable.getMessage());
             }));
     }
 
