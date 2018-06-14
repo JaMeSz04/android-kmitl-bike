@@ -16,7 +16,7 @@ android {
         versionName '1.0.0'
 
         buildConfigField("String", "BASE_URL",
-                "\"http://127.0.0.1:8000/\"")
+                "\"http://161.246.94.246:1995/\"")
     }
     buildTypes {
         release {
