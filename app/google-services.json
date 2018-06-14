@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "929403732375",
+    "firebase_url": "https://neobike-1521789523876.firebaseio.com",
+    "project_id": "neobike-1521789523876",
+    "storage_bucket": "neobike-1521789523876.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:929403732375:android:21a3598556cc6365",
+        "android_client_info": {
+          "package_name": "com.shubu.kmitlbike"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "929403732375-h7t7namcnomtvgbmau10trqa188t9l46.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdPllAXsiGiJ_Q2_LrGOYnbliHcmrExes"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

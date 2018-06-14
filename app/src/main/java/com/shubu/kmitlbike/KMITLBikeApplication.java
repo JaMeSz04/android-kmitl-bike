@@ -3,6 +3,7 @@ package com.shubu.kmitlbike;
 import android.app.Application;
 import android.content.Context;
 
+import com.crashlytics.android.Crashlytics;
 import com.orhanobut.hawk.Hawk;
 import com.polidea.rxandroidble2.RxBleClient;
 import com.polidea.rxandroidble2.internal.RxBleLog;
@@ -13,6 +14,7 @@ import com.shubu.kmitlbike.injection.component.DaggerBusComponent;
 import com.shubu.kmitlbike.injection.module.ApplicationModule;
 
 
+import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
 
 public class KMITLBikeApplication extends Application  {
@@ -25,6 +27,7 @@ public class KMITLBikeApplication extends Application  {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         Hawk.init(this.getApplicationContext()).build();
         eventBus = DaggerBusComponent.create();
         bluetooth = RxBleClient.create(this.getApplicationContext());
