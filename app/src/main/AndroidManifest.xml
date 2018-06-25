@@ -16,7 +16,7 @@
     <application
         android:name=".KMITLBikeApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
@@ -42,6 +42,7 @@
             android:name=".ui.detail.TermsAndConditionsActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ui.splash.SplashActivity"
+            android:exported="true"
             android:theme="@style/AppTheme.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

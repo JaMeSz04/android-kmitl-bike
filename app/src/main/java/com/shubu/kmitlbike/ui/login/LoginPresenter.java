@@ -46,6 +46,7 @@ public class LoginPresenter extends BasePresenter<LoginMVPView> {
     }
 
     public void login(String username, String password){
+        Timber.e("login");
         checkViewAttached();
         mSubscriptions.add(mDataManager.login(username, password)
                 .observeOn(AndroidSchedulers.mainThread())

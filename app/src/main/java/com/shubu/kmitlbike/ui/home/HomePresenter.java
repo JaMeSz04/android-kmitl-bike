@@ -100,6 +100,7 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
     }
 
     public void onScanComplete(Result code){
+
         Timber.i("HomePresenter on receive : " + code.getText());
         Bike bike = mDataManager.getBikeFromScannerCode(code);
         if (bike == null)
@@ -108,6 +109,7 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
             mDataManager.setUsingBike(bike);
             getMvpView().onScannerBikeUpdate(bike);
         } else {
+            Timber.e("brah2");
             if (!mDataManager.validateBikeReturn(bike)) {
                 mDataManager.setError("Please return the bike you've borrowed");
                 return;
@@ -161,6 +163,7 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
             }
         });
         mDataManager.performReturn(bike, location);
+        this.getBikeList();
 
     }
 
@@ -179,8 +182,10 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
     public void getUserSession(){
         mSubscriptions.add(mDataManager.getUserSession().observeOn( AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(
             userSession -> {
-                if(userSession.isResume())
+                if(userSession.isResume()) {
+                    mDataManager.setUsingBike(userSession.getBike());
                     getMvpView().onUserSessionUpdate();
+                }
             },
             throwable -> mDataManager.setError("")));
     }

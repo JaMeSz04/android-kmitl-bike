@@ -197,7 +197,7 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        return true;
     }
 
     private boolean isPasswordValid(String password) {
@@ -303,11 +303,13 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
     @Override
     public void showError(String error) {
         MaterialDialog.Builder dialog ;
+        this.showProgress(false);
         if (error.equals("")) {
             dialog = new MaterialDialog.Builder(this).title("Error").content("unexpected error... try again");
         } else {
             dialog = new MaterialDialog.Builder(this).title("Error").content(error);
         }
+
         dialog.build();
         dialog.show();
     }

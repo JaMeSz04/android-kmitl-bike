@@ -6,10 +6,9 @@ import java.util.regex.Pattern;
 
 public class UUIDHelper {
 
-    // base UUID used to build 128 bit Bluetooth UUIDs
+
     public static final String UUID_BASE = "0000XXXX-0000-1000-8000-00805f9b34fb";
 
-    // handle 16 and 128 bit UUIDs
     public static UUID uuidFromString(String uuid) {
 
         if (uuid.length() == 4) {
@@ -18,7 +17,6 @@ public class UUIDHelper {
         return UUID.fromString(uuid);
     }
 
-    // return 16 bit UUIDs where possible
     public static String uuidToString(UUID uuid) {
         String longUUID = uuid.toString();
         Pattern pattern = Pattern.compile("0000(.{4})-0000-1000-8000-00805f9b34fb", Pattern.CASE_INSENSITIVE);

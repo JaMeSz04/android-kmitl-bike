@@ -2,6 +2,7 @@ package com.shubu.kmitlbike.ui.splash;
 
 import com.orhanobut.hawk.Hawk;
 import com.shubu.kmitlbike.data.DataManager;
+import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.ui.base.BasePresenter;
 import com.shubu.kmitlbike.ui.login.LoginMVPView;
 
@@ -37,6 +38,7 @@ public class SplashPresenter extends BasePresenter<SplashMVPView> {
     }
 
     public void validateVersion(String version){
+        //this.validateToken();
         mSubscriptions.add(mDataManager.validateVersion(version).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
             .subscribe( versionResponse -> {
                 if (versionResponse.isRequiredUpdate())
@@ -49,6 +51,18 @@ public class SplashPresenter extends BasePresenter<SplashMVPView> {
     }
 
     private void validateToken(){
+//        //debuging purpose
+//        LoginResponse lr = new LoginResponse();
+//        lr.setFirstName("Patipon");
+//        lr.setLastName("Riebpradit");
+//        lr.setEmail("patipon74@gmail.com");
+//        lr.setGender(1);
+//        lr.setId(1);
+//        lr.setPoint(10);
+//        lr.setToken("");
+//        lr.setUsername("57090016");
+//        mDataManager.setCurrentUser(lr);
+//        getMvpView().redirect("main");
         if (Hawk.get("token","").isEmpty()) {
             getMvpView().redirect("login");
             return;

@@ -120,14 +120,18 @@ public class DataManager {
             usageStatus.onNext(BikeState.RETURN_START);
             if (this.util == null)
                 this.util = new BluetoothUtil(bike);
-            this.util.initBluetoothService("RETURN");
+            this.util.initBluetoothService();
         }
         Disposable task = mRouter.returnBike(bike.getId(), new BikeReturnForm(LocationAdapter.makeLocationForm(location), false)).observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
             .subscribe(
-                    bikeReturnResponse -> usageStatus.onComplete(),
+                    bikeReturnResponse -> {
+                        usageStatus.onComplete();
+                        this.util.dispose();
+                    },
                     throwable -> errorStatus.onNext("Unable to return bike... Try again later")
             );
+
     }
 
     public Single<List<ProfileHistory>> getHistoryList(){
@@ -138,10 +142,10 @@ public class DataManager {
     }
 
     public Bike getBikeFromScannerCode(Result code) {
-
+        Timber.e(this.bikeList.toString());
         try {
             List<Bike> result = Stream.of(this.bikeList).filter(bike -> bike.getBarcode().equals(code.getText())).toList();
-            return result.get(0);
+            return this.usingBike == null? result.get(0) : ( code.getText().equals(this.usingBike.getBarcode())? usingBike: result.get(0));
         } catch (Exception e){
             errorStatus.onNext("");
         }
@@ -150,6 +154,7 @@ public class DataManager {
 
 
     public void setBikeList(List<Bike> bikeList) {
+        Timber.e(bikeList.toString());
         this.bikeList = bikeList;
     }
 
@@ -185,7 +190,7 @@ public class DataManager {
             this.util.setEventbus(usageStatus);
             Disposable bluetooth = this.util.getOnceSubscriber().observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
                 .subscribe( item -> {nonce = item; borrowRequest(bike,location, this.util);}, throwable -> errorStatus.onNext("Bluetooth initialization error"));
-            this.util.initBluetoothService("BORROW");
+            this.util.initBluetoothService();
         } else {
             borrowRequest(bike,location, null);
         }
@@ -201,13 +206,16 @@ public class DataManager {
         else
             request.setNonce(Integer.parseInt(this.nonce));
         Timber.e(request.toString());
-        request.setSelectedPlan(CONSTANTS.SELECTED_PLAN);
+
+        request.setSelectedPlan(2);
         Disposable borrow = mRouter.borrowBike(bike.getId(), request)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(io.reactivex.schedulers.Schedulers.io())
                 .subscribe(bikeBorrowResponse  -> {
+                        Timber.e("borrow requested");
                         switch (bike.getBikeModel()) {
                             case CONSTANTS.GIANT_ESCAPE:
+                                Timber.e("message is : " + bikeBorrowResponse.getMessage());
                                 bluetoothUtil.borrow(bikeBorrowResponse.getMessage());
                                 break;
                             case CONSTANTS.LA_GREEN:

@@ -1,5 +1,7 @@
 package com.shubu.kmitlbike.util;
 
+import android.bluetooth.BluetoothGattCharacteristic;
+
 import com.annimon.stream.Stream;
 import com.polidea.rxandroidble2.RxBleClient;
 import com.polidea.rxandroidble2.RxBleConnection;
@@ -45,9 +47,10 @@ public class BluetoothUtil {
     private Bike target;
     private RxBleDevice device;
     private List<Disposable> tasks;
-    private RxBleConnection deviceConnection = null;
+    private RxBleConnection deviceConnection;
     private BluetoothTask command;
     private SingleSubject<String> onceSubscriber;
+    private BluetoothGattCharacteristic currentCharacteristic;
 
 
     public BluetoothUtil(Bike bike){
@@ -57,45 +60,28 @@ public class BluetoothUtil {
         tasks = new ArrayList<>();
     }
 
-    public void initBluetoothService(String cmd){
-        this.command = BluetoothTask.valueOf(cmd);
-        if (this.deviceConnection != null) {
-            this.returnBike();
-        } else {
-            tasks.add(this.startDiscover().subscribe(scanResult -> {
-                this.device = scanResult.getBleDevice();
-                this.connect().doFinally(this::dispose).observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                        rxBleConnection -> {
-                            this.deviceConnection = rxBleConnection;
-                            this.deviceConnection.discoverServices()
-                            .flatMap(rxBleDeviceServices -> rxBleDeviceServices.getCharacteristic(CHARACTERISTIC_ID))
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .doOnSubscribe(disposable -> this.updateEvent(BikeState.PAIRING))
-                            .subscribe(
-                                    bluetoothGattCharacteristic -> {
-                                        CHARACTERISTIC_ID = bluetoothGattCharacteristic.getUuid();
-                                        if (this.command.equals(BluetoothTask.BORROW))
-                                            this.onConnectionReceived();
-                                        else
-                                            this.returnBike();
-                                    },
-                                    throwable -> ErrorFactory.getErrorDialog("Unable to connect to the bike...")
-                            );
-
-                        });
-            }));
-        }
+    public void initBluetoothService(){
+        this.command = BluetoothTask.BORROW;
+        tasks.add(this.startDiscover().subscribe( scanResult -> {
+            this.device = scanResult.getBleDevice();
+            this.connect();
+        }));
     }
 
     public void borrow(String cmd){
-        Disposable borrowTask = this.deviceConnection.writeCharacteristic(CHARACTERISTIC_ID, cmd.getBytes(StandardCharsets.UTF_8))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    bytes -> onWriteSuccess(bytes),
-                    throwable -> Timber.e(throwable)
-                );
-        tasks.add(borrowTask);
+        Timber.e("test BOIRROWRS:DLFKJSD");
+        Timber.e(cmd);
+        Timber.e(cmd.getBytes(StandardCharsets.UTF_8).toString());
+        Timber.e(new String(cmd.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8));
+        Timber.e(new String(cmd.getBytes(StandardCharsets.UTF_8), StandardCharsets.US_ASCII));
+        tasks.add(this.deviceConnection.writeCharacteristic(this.currentCharacteristic, cmd.getBytes(StandardCharsets.UTF_8)).subscribe(bytes -> {
+            Timber.e("responses");
+            Timber.e(new String(bytes, StandardCharsets.UTF_8));
+        }, throwable -> {
+            Timber.e("throw");
+            Timber.e(throwable);
+        }));
+
     }
 
 
@@ -108,45 +94,45 @@ public class BluetoothUtil {
                 .filter( scanResult -> scanResult.getBleDevice().getMacAddress().equals( target.getMacAddress()) );
     }
 
-    private Observable<RxBleConnection> connect(){
-        return this.device.establishConnection(false).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io());
-    }
-
-    private void onConnectionReceived(){
-
-        this.updateEvent(BikeState.BORROW_START);
-
-        tasks.add(this.deviceConnection.setupNotification(CHARACTERISTIC_ID).flatMap(notificationObservable -> notificationObservable)
+    private void connect(){
+        this.updateEvent(BikeState.BORROW_SCAN_FINISH);
+        this.dispose();
+        tasks.add(this.device.establishConnection(false)
+                .doOnNext(rxBleConnection -> this.deviceConnection = rxBleConnection)
+                .flatMapSingle(RxBleConnection::discoverServices)
+                .flatMapSingle(rxBleDeviceServices -> rxBleDeviceServices.getCharacteristic(UUIDHelper.uuidFromString("FFE0"), UUIDHelper.uuidFromString("FFE1")))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bytes -> {
-                    this.onNotificationReceive(bytes);
-                    this.deviceConnection.writeCharacteristic(CHARACTERISTIC_ID, BORROW_COMMAND).observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                            data -> onWriteSuccess(data),
-                            throwable -> Timber.e(throwable)
-                    );
-                }, this::onNotificationFailure));
-
-
-    }
-
-    private void returnBike(){
-        this.tasks.add(this.deviceConnection.writeCharacteristic(CHARACTERISTIC_ID, RETURN_COMMAND).observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                bytes -> onWriteSuccess(bytes),
-                throwable -> ErrorFactory.getErrorDialog("Enable to return bike... please make sure you have bluetooth enabled/or contact KMITL Bike")
-            )
+                .subscribeOn(Schedulers.io())
+                .doFinally(this::dispose)
+                .subscribe(this::onConnectionReceived, this::onConnectionFailure)
         );
     }
 
+    private void onConnectionReceived(BluetoothGattCharacteristic characteristic){
+        this.currentCharacteristic = characteristic;
+        this.CHARACTERISTIC_ID = characteristic.getUuid();
+        RxBleConnection connection = this.deviceConnection;
+        this.updateEvent(BikeState.BORROW_START);
+
+        tasks.add(connection.setupNotification(characteristic).flatMap(notificationObservable -> notificationObservable)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onNotificationReceive, this::onNotificationFailure));
+
+        tasks.add(connection.writeCharacteristic(characteristic, BORROW_COMMAND).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    bytes -> onWriteSuccess(bytes),
+                    throwable -> Timber.e(throwable)
+                ));
+    }
+
     private void onWriteSuccess(byte[] response){
-        if (this.command.equals(BluetoothTask.BORROW)) {
-            this.updateEvent(BikeState.BORROW_COMPLETE);
-        } else {
-            this.updateEvent(BikeState.RETURN_COMPLETE);
-        }
         Timber.e("write success!!!");
+        this.updateEvent(BikeState.BORROW_COMPLETE);
         Timber.e(new String(response, StandardCharsets.UTF_8));
+    }
+
+    private void onConnectionFailure(Throwable throwable) {
+        Timber.e(throwable);
     }
 
     private void onNotificationReceive(byte[] bytes){
@@ -157,12 +143,16 @@ public class BluetoothUtil {
         switch (command[0]){
             case "NONCE":
                 onceSubscriber.onSuccess(command[1]);
+                break;
             case "BORROW":
-                eventbus.onComplete();
-            case "RETURN":
-                eventbus.onComplete();
+                if (command[1].equals("0"))
+                    ErrorFactory.getErrorDialog("unexpected error occour while borrow... try again or contact administrator!!");
+                else
+                    eventbus.onComplete();
+                break;
             case "TIMEOUT":
-                ErrorFactory.getErrorDialog("Connection timeout... Try rescan or contact KMITL Bike Page");
+                ErrorFactory.getErrorDialog("Unable to connect to the lock... connection time out");
+                this.deviceConnection.writeCharacteristic(CHARACTERISTIC_ID, RETURN_COMMAND);
 
         }
 
@@ -178,7 +168,7 @@ public class BluetoothUtil {
         }
     }
 
-    private void dispose(){
+    public void dispose(){
         Stream.of(tasks).forEach(Disposable::dispose);
     }
 
