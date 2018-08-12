@@ -35,6 +35,7 @@ import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
 import com.shubu.kmitlbike.ui.common.ErrorFactory;
 import com.shubu.kmitlbike.util.BluetoothUtil;
+import com.shubu.kmitlbike.util.ChineseBikeUtil;
 import com.shubu.kmitlbike.util.UUIDHelper;
 
 import java.nio.charset.StandardCharsets;
@@ -184,16 +185,22 @@ public class DataManager {
     }
 
     public void performBorrow(Bike bike, Location location) {
-        if (bike.getBikeModel().equals(CONSTANTS.GIANT_ESCAPE)) {
-            if (this.util == null)
-                this.util = new BluetoothUtil(bike);
-            this.util.setEventbus(usageStatus);
-            Disposable bluetooth = this.util.getOnceSubscriber().observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
-                .subscribe( item -> {nonce = item; borrowRequest(bike,location, this.util);}, throwable -> errorStatus.onNext("Bluetooth initialization error"));
-            this.util.initBluetoothService();
-        } else {
-            borrowRequest(bike,location, null);
+//        if (bike.getBikeModel().equals(CONSTANTS.GIANT_ESCAPE)) {
+//            if (this.util == null)
+//                this.util = new BluetoothUtil(bike);
+//            this.util.setEventbus(usageStatus);
+//            Disposable bluetooth = this.util.getOnceSubscriber().observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
+//                .subscribe( item -> {nonce = item; borrowRequest(bike,location, this.util);}, throwable -> errorStatus.onNext("Bluetooth initialization error"));
+//            this.util.initBluetoothService();
+//        } else {
+//            borrowRequest(bike,location, null);
+//        }
+        if (bike.getBikeModel().equals(CONSTANTS.GIANT_ESCAPE)){
+            ChineseBikeUtil util = new ChineseBikeUtil(bike);
+            Timber.e("starto");
+
         }
+
     }
 
     private void borrowRequest(Bike bike, Location location, BluetoothUtil bluetoothUtil){
