@@ -29,6 +29,7 @@ public class KMITLBikeApplication extends Application  {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
         Hawk.init(this.getApplicationContext()).build();
+        Hawk.put("firsttime", true);
         eventBus = DaggerBusComponent.create();
         bluetooth = RxBleClient.create(this.getApplicationContext());
         appContext = getApplicationContext();
@@ -38,6 +39,7 @@ public class KMITLBikeApplication extends Application  {
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         }
+
     }
 
     public static Context getAppContext(){

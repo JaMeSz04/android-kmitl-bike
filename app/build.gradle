@@ -18,13 +18,13 @@ apply plugin: 'io.fabric'
 
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 26
     buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "com.shubu.kmitlbike"
-        minSdkVersion 19
-        targetSdkVersion 23
+        minSdkVersion 23
+        targetSdkVersion 26
         testInstrumentationRunner "${applicationId}.runner.RxAndroidJUnitRunner"
         versionCode 1
         // Major -> Millions, Minor -> Thousands, Bugfix -> Hundreds. E.g 1.3.72 == 1,003,072
@@ -72,7 +72,6 @@ dependencies {
     final ESPRESSO_VERSION = '2.2.2'
     final RUNNER_VERSION = '0.4'
     final BUTTERKNIFE_VERSION = '8.4.0'
-
     def daggerCompiler = "com.google.dagger:dagger-compiler:$DAGGER_VERSION"
     def jUnit = "junit:junit:4.12"
     def mockito = "org.mockito:mockito-core:1.10.19"
@@ -82,32 +81,31 @@ dependencies {
     implementation 'com.budiyev.android:code-scanner:1.8.3'
     implementation 'com.google.android.gms:play-services-maps:12.0.0'
     implementation 'com.google.android.gms:play-services-location:12.0.0'
-    implementation "com.polidea.rxandroidble2:rxandroidble:1.5.0"
+    implementation 'com.polidea.rxandroidble2:rxandroidble:1.5.0'
     implementation "com.android.support:appcompat-v7:$SUPPORT_LIBRARY_VERSION"
     implementation "com.android.support:recyclerview-v7:$SUPPORT_LIBRARY_VERSION"
     implementation "com.android.support:cardview-v7:$SUPPORT_LIBRARY_VERSION"
     implementation "com.android.support:design:$SUPPORT_LIBRARY_VERSION"
     implementation "com.android.support:support-annotations:$SUPPORT_LIBRARY_VERSION"
-
     implementation 'com.squareup.sqlbrite:sqlbrite:0.5.0'
     implementation "com.squareup.retrofit2:retrofit:$RETROFIT_VERSION"
     implementation "com.squareup.retrofit2:converter-gson:$RETROFIT_VERSION"
-    implementation "com.squareup.retrofit2:adapter-rxjava:2.1.0"
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
     implementation "com.squareup.okhttp3:okhttp:$OKHTTP_VERSION"
     implementation "com.squareup.okhttp3:logging-interceptor:$OKHTTP_VERSION"
-
     implementation 'com.github.bumptech.glide:glide:3.7.0'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    implementation "io.reactivex.rxjava2:rxjava:2.1.0"
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.0'
     implementation 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:1.0.0'
     implementation "com.jakewharton:butterknife:$BUTTERKNIFE_VERSION"
     implementation 'com.jakewharton.timber:timber:4.7.0'
     implementation 'com.github.javiersantos:MaterialStyledDialogs:2.1'
-
     implementation "com.google.dagger:dagger:$DAGGER_VERSION"
-    implementation 'com.android.support:support-v4:23.4.0'
-    compileOnly 'org.glassfish:javax.annotation:10.0-b28' //Required by Dagger2
+    implementation 'com.android.support:support-v4:26.1.0'
+    compileOnly 'org.glassfish:javax.annotation:10.0-b28'
+    implementation 'com.github.apl-devs:appintro:v4.2.3'
 
+    //Required by Dagger2
     implementation 'com.orhanobut:hawk:2.0.1'
 
     // Instrumentation test dependencies
@@ -138,11 +136,11 @@ dependencies {
     // APT dependencies
     annotationProcessor "com.jakewharton:butterknife-compiler:$BUTTERKNIFE_VERSION"
     annotationProcessor daggerCompiler
-
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     compile('com.crashlytics.sdk.android:crashlytics:2.9.4@aar') {
         transitive = true;
     }
+
 }
 
 // Log out test results to console

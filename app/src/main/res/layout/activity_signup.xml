@@ -7,10 +7,10 @@
 
     tools:context="com.shubu.kmitlbike.ui.login.LoginActivity">
 
-    <!-- Login progress -->
+    <!-- Signup progress -->
 
     <ProgressBar
-        android:id="@+id/login_progress"
+        android:id="@+id/signup_progress"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,13 +19,13 @@
         android:visibility="gone" />
 
     <ScrollView
-        android:id="@+id/login_form"
+        android:id="@+id/signup_form"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="16dp">
 
         <LinearLayout
-            android:id="@+id/email_login_form"
+            android:id="@+id/email_signup_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -46,17 +46,18 @@
                     app:srcCompat="@drawable/bicycle_rider" />
 
                 <TextView
-                    android:id="@+id/textView"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/textView2"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
                     android:layout_weight="1"
                     android:fontFamily="sans-serif"
                     android:text="KMITL BIKE"
                     android:textAlignment="center"
                     android:textSize="36dp"
                     android:textStyle="bold" />
+
             </LinearLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -64,46 +65,128 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <AutoCompleteTextView
-                    android:id="@+id/email"
+                <EditText
+                    android:id="@+id/firstname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/input_field"
-                    android:hint="KMITL EMAIL"
-                    android:inputType="textEmailAddress"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:textAlignment="textStart" />
+                    android:background="@drawable/input_field_signuppage"
+                    android:ems="10"
+                    android:hint="FIRST NAME"
+                    android:inputType="textPersonName"
+                    android:selectAllOnFocus="false" />
 
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                 >
+                android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/password"
-                    android:hint="PASSWORD"
+                    android:id="@+id/lastname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/input_field"
-                    android:inputType="textPassword"
-                    android:maxLines="1"
-                    android:selectAllOnFocus="false"
-                    android:textAlignment="textStart" />
+                    android:layout_weight="1"
+                    android:background="@drawable/input_field_signuppage"
+                    android:ems="10"
+                    android:hint="LAST NAME"
+                    android:inputType="textPersonName"
+                    android:selectAllOnFocus="false" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:id="@+id/email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/input_field_signuppage"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:hint="KMITL EMAIL"
+                    android:inputType="textEmailAddress"
+                    android:selectAllOnFocus="false" />
 
             </android.support.design.widget.TextInputLayout>
 
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:id="@+id/phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/input_field_signuppage"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:hint="PHONE"
+                    android:inputType="phone"
+                    android:selectAllOnFocus="false" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </android.support.design.widget.TextInputLayout>
+
+
+            <TextView
+                android:id="@+id/genderLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginTop="16dp"
+                android:layout_toLeftOf="@+id/genderRadioGroup"
+                android:layout_weight="1"
+                android:background="@drawable/input_field_signuppage"
+                android:fontFamily="sans-serif"
+                android:text="GENDER"
+                android:textAlignment="textStart"
+                android:textColor="#a8a8a8"
+                android:textSize="18sp">
+
+
+            </TextView>
+
+            <RadioGroup
+                android:id="@+id/genderRadioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="visible">
+
+                <RadioButton
+                    android:id="@+id/male"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="Male"
+                    android:textColor="#a8a8a8" />
+
+                <RadioButton
+                    android:id="@+id/female"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Female"
+                    android:textColor="#a8a8a8" />
+            </RadioGroup>
+
+
             <Button
-                android:id="@+id/email_sign_in_button"
+                android:id="@+id/email_sign_up_button"
                 style="?android:textAppearanceSmall"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
+                android:layout_marginTop="16dp"
                 android:background="@drawable/signin_button"
-                android:text="Sign in"
+                android:text="Sign up"
                 android:textStyle="bold" />
 
         </LinearLayout>

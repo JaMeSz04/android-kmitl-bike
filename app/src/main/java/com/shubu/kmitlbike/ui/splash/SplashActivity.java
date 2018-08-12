@@ -17,6 +17,7 @@ import com.shubu.kmitlbike.ui.base.BaseActivity;
 import com.shubu.kmitlbike.ui.home.HomeActivity;
 import com.shubu.kmitlbike.ui.login.LoginActivity;
 import com.shubu.kmitlbike.ui.splash.fragments.UpdateNotifierFragment;
+import com.shubu.kmitlbike.ui.tutorial.TutorialActivity;
 
 import javax.inject.Inject;
 
@@ -67,6 +68,11 @@ public class SplashActivity extends BaseActivity implements SplashMVPView {
 
             case "login" :
                 intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
+                break;
+
+            case "tutorial" :
+                intent = new Intent(this, TutorialActivity.class);
                 startActivity(intent);
                 break;
 

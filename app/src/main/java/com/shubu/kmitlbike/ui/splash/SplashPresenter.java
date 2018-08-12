@@ -1,10 +1,15 @@
 package com.shubu.kmitlbike.ui.splash;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+
 import com.orhanobut.hawk.Hawk;
 import com.shubu.kmitlbike.data.DataManager;
 import com.shubu.kmitlbike.data.model.LoginResponse;
 import com.shubu.kmitlbike.ui.base.BasePresenter;
 import com.shubu.kmitlbike.ui.login.LoginMVPView;
+import com.shubu.kmitlbike.ui.tutorial.TutorialActivity;
 
 import javax.inject.Inject;
 
@@ -63,6 +68,12 @@ public class SplashPresenter extends BasePresenter<SplashMVPView> {
 //        lr.setUsername("57090016");
 //        mDataManager.setCurrentUser(lr);
 //        getMvpView().redirect("main");
+
+        if (Hawk.get("firsttime").equals(true)){
+            getMvpView().redirect("tutorial");
+            Hawk.put("firsttime",false);
+        }
+
         if (Hawk.get("token","").isEmpty()) {
             getMvpView().redirect("login");
             return;
