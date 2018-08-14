@@ -1,6 +1,7 @@
 package com.shubu.kmitlbike.ui.tutorial;
 
 import android.Manifest;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,7 +10,17 @@ import android.support.v4.app.Fragment;
 import com.github.paolorotolo.appintro.AppIntro;
 import com.github.paolorotolo.appintro.AppIntroFragment;
 import com.github.paolorotolo.appintro.model.SliderPage;
+import com.orhanobut.hawk.Hawk;
 import com.shubu.kmitlbike.R;
+import com.shubu.kmitlbike.ui.base.BaseActivity;
+import com.shubu.kmitlbike.ui.home.HomeActivity;
+import com.shubu.kmitlbike.ui.login.LoginActivity;
+import com.shubu.kmitlbike.ui.login.LoginPresenter;
+import com.shubu.kmitlbike.ui.splash.SplashActivity;
+
+import javax.inject.Inject;
+
+import timber.log.Timber;
 
 public class TutorialActivity extends AppIntro{
 
@@ -43,21 +54,40 @@ public class TutorialActivity extends AppIntro{
 
     @Override
     public void onSkipPressed(Fragment currentFragment) {
-        super.onSkipPressed(currentFragment);
-        finish();
+        //super.onSkipPressed(currentFragment);
+        Hawk.put("firsttime",false);
+        redirect("splash");
+        return;
+
         // Do something when users tap on Skip button.
     }
 
     @Override
     public void onDonePressed(Fragment currentFragment) {
-        super.onDonePressed(currentFragment);
-        finish();
+        //super.onDonePressed(currentFragment);
+        Hawk.put("firsttime",false);
+        redirect("splash");
+        return;
+
         // Do something when users tap on Done button.
     }
 
     @Override
     public void onSlideChanged(@Nullable Fragment oldFragment, @Nullable Fragment newFragment) {
-        super.onSlideChanged(oldFragment, newFragment);
+        //super.onSlideChanged(oldFragment, newFragment);
         // Do something when the slide changes.
+    }
+
+
+    public void redirect(String where) {
+        Timber.e("redirecting");
+        Intent intent;
+        switch (where){
+            case "splash" :
+                intent = new Intent(this,SplashActivity.class);
+                startActivity(intent);
+                break;
+
+        }
     }
 }

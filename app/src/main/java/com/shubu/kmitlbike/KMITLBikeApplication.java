@@ -29,7 +29,7 @@ public class KMITLBikeApplication extends Application  {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
         Hawk.init(this.getApplicationContext()).build();
-        Hawk.put("firsttime", true);
+
         eventBus = DaggerBusComponent.create();
         bluetooth = RxBleClient.create(this.getApplicationContext());
         appContext = getApplicationContext();
