@@ -18,6 +18,7 @@ import com.shubu.kmitlbike.KMITLBikeApplication;
 
 import java.util.UUID;
 
+import architecture.com.jimi.NativeController;
 import timber.log.Timber;
 
 public class CopyBikeUtil {
