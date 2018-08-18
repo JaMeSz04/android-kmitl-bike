@@ -35,18 +35,18 @@ public class TutorialActivity extends AppIntro{
         //slide1
         SliderPage sliderPage1 = new SliderPage();
         sliderPage1.setTitle("Grab your KMITL Bike");
-        sliderPage1.setDescription("Press the green borrow button at the bottom of the menu to start your journey.\n" +
-                "Press it again to return the bike.");
-        sliderPage1.setImageDrawable(R.drawable.bicycle_rider);
+        sliderPage1.setDescription("Press the RIDE button at the bottom of the menu to start your journey.\n" +
+                "Press the RETURN button to return the bike.");
+        sliderPage1.setImageDrawable(R.drawable.tutorial_borrow);
         sliderPage1.setBgColor(Color.parseColor("#90BC4C"));
         addSlide(AppIntroFragment.newInstance(sliderPage1));
 
         //slide2
         SliderPage sliderPage2 = new SliderPage();
         sliderPage2.setTitle("Your help and data");
-        sliderPage2.setDescription("Additional features can be found in the bottom right menu by simply tap to expand.\n" +
+        sliderPage2.setDescription("Additional features can be found in the top left menu by simply tap to expand.\n" +
                 "You can contact us via contact admin or report icon");
-        sliderPage2.setImageDrawable(R.drawable.bicycle_rider);
+        sliderPage2.setImageDrawable(R.drawable.tutorial_menu);
         sliderPage2.setBgColor(Color.parseColor("#90BC4C"));
         addSlide(AppIntroFragment.newInstance(sliderPage2));
 
@@ -55,7 +55,7 @@ public class TutorialActivity extends AppIntro{
     @Override
     public void onSkipPressed(Fragment currentFragment) {
         //super.onSkipPressed(currentFragment);
-        Hawk.put("firsttime",false);
+        Hawk.put("firstTime","no");
         redirect("splash");
         return;
 
@@ -65,7 +65,7 @@ public class TutorialActivity extends AppIntro{
     @Override
     public void onDonePressed(Fragment currentFragment) {
         //super.onDonePressed(currentFragment);
-        Hawk.put("firsttime",false);
+        Hawk.put("firstTime","no");
         redirect("splash");
         return;
 

@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <uses-feature android:name="android.hardware.location.gps" />
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
 
     <application
         android:name=".KMITLBikeApplication"
@@ -50,7 +51,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.tutorial.TutorialActivity"
-            android:label="Tutorial"/>
+            android:label="Tutorial"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="31b928193de9a8d2fb4f83f8acb61d060c2c3bbc" />

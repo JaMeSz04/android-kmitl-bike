@@ -35,6 +35,7 @@ import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
 import com.shubu.kmitlbike.ui.common.ErrorFactory;
 import com.shubu.kmitlbike.util.BluetoothUtil;
+import com.shubu.kmitlbike.util.CopyBikeUtil;
 import com.shubu.kmitlbike.util.UUIDHelper;
 
 import java.nio.charset.StandardCharsets;
@@ -120,7 +121,7 @@ public class DataManager {
             usageStatus.onNext(BikeState.RETURN_START);
             if (this.util == null)
                 this.util = new BluetoothUtil(bike);
-            this.util.initBluetoothService();
+//            this.util.initBluetoothService();
         }
         Disposable task = mRouter.returnBike(bike.getId(), new BikeReturnForm(LocationAdapter.makeLocationForm(location), false)).observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
@@ -185,12 +186,8 @@ public class DataManager {
 
     public void performBorrow(Bike bike, Location location) {
         if (bike.getBikeModel().equals(CONSTANTS.GIANT_ESCAPE)) {
-            if (this.util == null)
-                this.util = new BluetoothUtil(bike);
-            this.util.setEventbus(usageStatus);
-            Disposable bluetooth = this.util.getOnceSubscriber().observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
-                .subscribe( item -> {nonce = item; borrowRequest(bike,location, this.util);}, throwable -> errorStatus.onNext("Bluetooth initialization error"));
-            this.util.initBluetoothService();
+            CopyBikeUtil hehe = new CopyBikeUtil();
+
         } else {
             borrowRequest(bike,location, null);
         }

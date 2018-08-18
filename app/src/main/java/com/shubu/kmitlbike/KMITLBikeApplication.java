@@ -1,6 +1,7 @@
 package com.shubu.kmitlbike;
 
 import android.app.Application;
+import android.bluetooth.BluetoothManager;
 import android.content.Context;
 
 import com.crashlytics.android.Crashlytics;
@@ -23,6 +24,7 @@ public class KMITLBikeApplication extends Application  {
     private static Context appContext;
     private static BusComponent eventBus;
     private static RxBleClient bluetooth;
+    private static BluetoothManager bluetoothManager;
 
     @Override
     public void onCreate() {
@@ -35,6 +37,7 @@ public class KMITLBikeApplication extends Application  {
         appContext = getApplicationContext();
         RxBleClient.setLogLevel(RxBleLog.DEBUG);
         RxBleLog.setLogger((level,tag,msg) -> Timber.tag(tag).log(level,msg));
+        bluetoothManager = (BluetoothManager) getSystemService(this.BLUETOOTH_SERVICE);
         //BluetoothComponent bluetooth = DaggerBluetoothComponent.builder().build();
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
@@ -52,6 +55,10 @@ public class KMITLBikeApplication extends Application  {
 
     public static RxBleClient getBluetooth(){
         return bluetooth;
+    }
+
+    public static BluetoothManager getBluetoothManager(){
+        return bluetoothManager;
     }
 
     public static KMITLBikeApplication get(Context context) {

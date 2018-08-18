@@ -69,7 +69,8 @@ public class SplashPresenter extends BasePresenter<SplashMVPView> {
 //        mDataManager.setCurrentUser(lr);
 //        getMvpView().redirect("main");
 
-        if (!Hawk.get("firsttime").equals(false)){
+
+        if (Hawk.get("firstTime","").isEmpty()){
             getMvpView().redirect("tutorial");
             return;
         }
