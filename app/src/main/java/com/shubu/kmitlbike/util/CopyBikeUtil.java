@@ -15,16 +15,18 @@ import android.util.Log;
 
 
 import com.shubu.kmitlbike.KMITLBikeApplication;
+import com.shubu.kmitlbike.data.state.BikeState;
 
 import java.util.UUID;
 
 import architecture.com.jimi.NativeController;
+import io.reactivex.subjects.PublishSubject;
 import timber.log.Timber;
 
 public class CopyBikeUtil {
 
-    private String mac = "C4A82808285E"; // Replace the MAC with the
-    // corresponding lock
+    //mac addr of lock -> "C4:A8:28:08:28:5E"
+    private String mac;
 
     public class DataClass {
         public BluetoothDevice device = null;
@@ -60,8 +62,8 @@ public class CopyBikeUtil {
 
     private boolean isUnlocked = false;
 
-    public CopyBikeUtil() {
-
+    public CopyBikeUtil(String mac, PublishSubject<BikeState> usageStatus) {
+        this.mac = mac;
         key = NativeController.getEncyptKey();
         gettoken = NativeController.getTokenCmd();
 
@@ -70,6 +72,9 @@ public class CopyBikeUtil {
         mBluetoothAdapter = bluetoothManager.getAdapter();
 
         mBluetoothAdapter.startLeScan(mLeScanCallback);
+
+        usageStatus.onNext(BikeState.BORROW_COMPLETE);
+        usageStatus.onComplete();
 
     }
 
@@ -228,7 +233,7 @@ public class CopyBikeUtil {
                     }
                 }
 
-                if (mDeviceAddress.replace(":","").equals(mac)) {
+                if (mDeviceAddress.equals(mac)) {
                     //Scan to specified device
                     Log.e("Tag","Scan to specified device:" + mDeviceAddress);
                     String nowAddress = mDeviceAddress;

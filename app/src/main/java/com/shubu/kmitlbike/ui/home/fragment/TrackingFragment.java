@@ -151,7 +151,7 @@ public class TrackingFragment extends BaseBottomSheetFragment {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         cal.add(Calendar.HOUR_OF_DAY, this.bikeDuration / 60);
-        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm");
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
         return formatter.format(cal.getTime());
     }
 

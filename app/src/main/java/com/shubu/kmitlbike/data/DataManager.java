@@ -186,7 +186,8 @@ public class DataManager {
 
     public void performBorrow(Bike bike, Location location) {
         if (bike.getBikeModel().equals(CONSTANTS.GIANT_ESCAPE)) {
-            CopyBikeUtil hehe = new CopyBikeUtil();
+            //send borrow request (try to connect to server)
+            borrowRequest(bike,location,null);
 
         } else {
             borrowRequest(bike,location, null);
@@ -200,8 +201,7 @@ public class DataManager {
 
         if (this.nonce == null)
             request.setNonce(Math.round(System.nanoTime() / 1000));
-        else
-            request.setNonce(Integer.parseInt(this.nonce));
+
         Timber.e(request.toString());
 
         request.setSelectedPlan(2);
@@ -213,7 +213,10 @@ public class DataManager {
                         switch (bike.getBikeModel()) {
                             case CONSTANTS.GIANT_ESCAPE:
                                 Timber.e("message is : " + bikeBorrowResponse.getMessage());
-                                bluetoothUtil.borrow(bikeBorrowResponse.getMessage());
+                                //bluetoothUtil.borrow(bikeBorrowResponse.getMessage());
+                                Timber.e("Bike mac addr: " + bike.getMacAddress());
+                                CopyBikeUtil hehe = new CopyBikeUtil(bike.getMacAddress(),usageStatus); //unlock the bike
+
                                 break;
                             case CONSTANTS.LA_GREEN:
                                 usageStatus.onComplete();
