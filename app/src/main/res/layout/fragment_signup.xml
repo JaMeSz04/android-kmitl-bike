@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
-
-    tools:context="com.shubu.kmitlbike.ui.login.LoginActivity">
+    tools:context="com.shubu.kmitlbike.ui.login.SignupFragment">
 
     <!-- Signup progress -->
 
@@ -43,20 +42,7 @@
                     android:layout_height="92dp"
                     android:layout_gravity="center"
                     android:layout_weight="1"
-                    app:srcCompat="@drawable/bicycle_rider" />
-
-                <TextView
-                    android:id="@+id/textView2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="16dp"
-                    android:layout_weight="1"
-                    android:fontFamily="sans-serif"
-                    android:text="KMITL BIKE"
-                    android:textAlignment="center"
-                    android:textSize="36dp"
-                    android:textStyle="bold" />
+                    app:srcCompat="@drawable/tbikelogo" />
 
             </LinearLayout>
 
@@ -66,31 +52,15 @@
                 android:orientation="horizontal">
 
                 <EditText
-                    android:id="@+id/firstname"
+                    android:id="@+id/fullname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/input_field_signuppage"
                     android:ems="10"
-                    android:hint="FIRST NAME"
+                    android:hint="FULL NAME"
                     android:inputType="textPersonName"
                     android:selectAllOnFocus="false" />
 
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <EditText
-                    android:id="@+id/lastname"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_field_signuppage"
-                    android:ems="10"
-                    android:hint="LAST NAME"
-                    android:inputType="textPersonName"
-                    android:selectAllOnFocus="false" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -101,13 +71,30 @@
                     android:id="@+id/email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/input_field_signuppage"
                     android:layout_weight="1"
+                    android:background="@drawable/input_field_signuppage"
                     android:ems="10"
                     android:hint="KMITL EMAIL"
                     android:inputType="textEmailAddress"
                     android:selectAllOnFocus="false" />
 
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/signuppassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/input_field"
+                    android:hint="PASSWORD"
+                    android:inputType="textPassword"
+                    android:maxLines="1"
+                    android:selectAllOnFocus="false"
+                    android:textAlignment="textStart" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -118,8 +105,8 @@
                     android:id="@+id/phone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/input_field_signuppage"
                     android:layout_weight="1"
+                    android:background="@drawable/input_field_signuppage"
                     android:ems="10"
                     android:hint="PHONE"
                     android:inputType="phone"
@@ -134,29 +121,12 @@
             </android.support.design.widget.TextInputLayout>
 
 
-            <TextView
-                android:id="@+id/genderLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:layout_marginTop="16dp"
-                android:layout_toLeftOf="@+id/genderRadioGroup"
-                android:layout_weight="1"
-                android:background="@drawable/input_field_signuppage"
-                android:fontFamily="sans-serif"
-                android:text="GENDER"
-                android:textAlignment="textStart"
-                android:textColor="#a8a8a8"
-                android:textSize="18sp">
-
-
-            </TextView>
-
             <RadioGroup
                 android:id="@+id/genderRadioGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:layout_marginTop="16dp"
                 android:visibility="visible">
 
                 <RadioButton
@@ -186,7 +156,7 @@
                 android:layout_marginBottom="16dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/signin_button"
-                android:text="Sign up"
+                android:text="Register"
                 android:textStyle="bold" />
 
         </LinearLayout>

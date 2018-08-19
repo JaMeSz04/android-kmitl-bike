@@ -61,9 +61,11 @@ public class CopyBikeUtil {
     byte[] gettoken;
 
     private boolean isUnlocked = false;
+    private PublishSubject<BikeState> usageStatus = null;
 
     public CopyBikeUtil(String mac, PublishSubject<BikeState> usageStatus) {
         this.mac = mac;
+        this.usageStatus = usageStatus;
         key = NativeController.getEncyptKey();
         gettoken = NativeController.getTokenCmd();
 
@@ -73,8 +75,8 @@ public class CopyBikeUtil {
 
         mBluetoothAdapter.startLeScan(mLeScanCallback);
 
-        usageStatus.onNext(BikeState.BORROW_COMPLETE);
-        usageStatus.onComplete();
+        this.usageStatus.onNext(BikeState.BORROW_COMPLETE);
+
 
     }
 
@@ -162,6 +164,7 @@ public class CopyBikeUtil {
                 case 1: {
                     // 开锁成功 [Unlocked successfully]
                     m_myData.count++;
+                    usageStatus.onComplete();
                     Timber.e("Equipment name:" + m_myData.name + "\r\n"
                             + "Signal strength:" + String.valueOf(m_myData.rssi)
                             + "\r\n" + "Operation frequency:"
