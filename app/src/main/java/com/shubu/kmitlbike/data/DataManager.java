@@ -148,7 +148,7 @@ public class DataManager {
             List<Bike> result = Stream.of(this.bikeList).filter(bike -> bike.getBarcode().equals(code.getText())).toList();
             return this.usingBike == null? result.get(0) : ( code.getText().equals(this.usingBike.getBarcode())? usingBike: result.get(0));
         } catch (Exception e){
-            errorStatus.onNext("");
+            errorStatus.onNext("Bike not found... refresh and try again");
         }
         return null;
     }
