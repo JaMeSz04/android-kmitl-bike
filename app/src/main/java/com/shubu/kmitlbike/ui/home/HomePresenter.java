@@ -39,6 +39,7 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
 
     private final DataManager mDataManager;
     private CompositeDisposable mSubscriptions;
+    private boolean ready = false;
 
 
     @Inject
@@ -67,6 +68,14 @@ public class HomePresenter extends BasePresenter<HomeMVPView> {
 
     public Bike getSession(){
         return mDataManager.getUsingBike();
+    }
+
+    public boolean isReady() {
+        return ready;
+    }
+
+    public void setReady(boolean ready) {
+        this.ready = ready;
     }
 
     public void getBikeList() {

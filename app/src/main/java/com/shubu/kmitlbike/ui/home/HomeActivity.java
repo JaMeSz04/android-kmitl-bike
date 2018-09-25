@@ -48,6 +48,7 @@ import com.shubu.kmitlbike.data.model.bike.Session;
 import com.shubu.kmitlbike.data.state.BikeState;
 import com.shubu.kmitlbike.ui.base.BaseActivity;
 import com.shubu.kmitlbike.ui.common.CONSTANTS;
+import com.shubu.kmitlbike.ui.common.ErrorFactory;
 import com.shubu.kmitlbike.ui.common.MapEvent;
 import com.shubu.kmitlbike.ui.detail.TermsAndConditionsActivity;
 import com.shubu.kmitlbike.ui.home.fragment.BikeInfoFragment;
@@ -269,7 +270,13 @@ public class HomeActivity extends BaseActivity implements
         sheetBehavior.setBottomSheetCallback(
                 new BottomSheetBehavior.BottomSheetCallback() {
                     @Override
-                    public void onStateChanged(@NonNull View bottomSheet, int newState) { }
+                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                        Timber.e("state changed to : " + Integer.toString(newState));
+                        if(!presenter.isReady()) {
+                            ErrorFactory.getErrorDialog("Loading data... try again");
+                            sheetBehavior.setState(4);
+                        }
+                    }
 
                     @Override
                     public void onSlide(@NonNull View bottomSheet, float slideOffset) {
@@ -345,6 +352,7 @@ public class HomeActivity extends BaseActivity implements
     @Override
     public void onBikeListUpdate(List<Bike> bikes) {
         Timber.e("updated");
+        this.presenter.setReady(true);
         this.eventBus.getBike().onNext(bikes); //publish bikes to subscribers
     }
 

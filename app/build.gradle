@@ -33,7 +33,7 @@ android {
 //        buildConfigField("String", "BASE_URL",
 //                "\"http://161.246.94.246:1995/\"")
         buildConfigField("String", "BASE_URL",
-                "\"http://192.168.95.73:8000/\"")
+                "\"http://161.246.94.246:1995/\"")
     }
     buildTypes {
         release {
